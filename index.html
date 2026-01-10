@@ -9,6 +9,7 @@
         :root {
             --primary: #c0392b;
             --secondary: #e74c3c;
+            --green: #27ae60;
             --dark: #2c3e50;
             --light: #ecf0f1;
             --silver: #bdc3c7;
@@ -44,12 +45,13 @@
             gap: 30px;
         }
 
-        /* Simulator Section */
-        .simulator-box {
+        /* Simulator & Portfolio Boxes */
+        .box {
             background: #fdfdfd;
             border: 1px solid #e0e0e0;
             padding: 25px;
             border-radius: 12px;
+            margin-bottom: 25px;
         }
 
         .simulator-box h2 {
@@ -63,6 +65,18 @@
             align-items: center;
         }
 
+        .portfolio-box {
+            border-top: 4px solid var(--green);
+        }
+
+        .portfolio-box h2 {
+            margin-top: 0;
+            color: var(--dark);
+            border-bottom: 2px solid var(--green);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
         .status-badge {
             font-size: 0.5em;
             background: #eee;
@@ -71,21 +85,12 @@
             color: #666;
             font-weight: normal;
         }
-        .status-badge.live {
-            background: #d4edda;
-            color: #155724;
-        }
-        .status-badge.partial {
-            background: #fff3cd;
-            color: #856404;
-        }
-        .status-badge.error {
-            background: #f8d7da;
-            color: #721c24;
-        }
+        .status-badge.live { background: #d4edda; color: #155724; }
+        .status-badge.partial { background: #fff3cd; color: #856404; }
+        .status-badge.error { background: #f8d7da; color: #721c24; }
 
         .input-group {
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
 
         .input-group label {
@@ -133,6 +138,28 @@
             color: var(--primary);
             margin: 10px 0;
         }
+        
+        /* Portfolio Specific Results */
+        .pnl-positive { color: var(--green); }
+        .pnl-negative { color: var(--primary); }
+        
+        .pnl-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 15px;
+            text-align: left;
+            font-size: 0.9em;
+        }
+        
+        .pnl-item {
+            background: white;
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid #eee;
+        }
+        .pnl-label { color: #888; font-size: 0.85em; }
+        .pnl-val { font-weight: bold; font-size: 1.1em; }
 
         .sub-text {
             font-size: 0.9em;
@@ -145,7 +172,7 @@
             padding: 20px;
             border-radius: 12px;
             position: relative;
-            height: 500px;
+            height: 600px;
             border: 1px solid #eee;
             display: flex;
             flex-direction: column;
@@ -160,10 +187,7 @@
             gap: 10px;
         }
 
-        .chart-controls {
-            display: flex;
-            gap: 8px;
-        }
+        .chart-controls { display: flex; gap: 8px; }
         
         .days-control {
             display: flex;
@@ -193,9 +217,7 @@
             border-color: var(--primary);
         }
 
-        .btn:hover:not(.active) {
-            background: #e0e0e0;
-        }
+        .btn:hover:not(.active) { background: #e0e0e0; }
 
         .canvas-container {
             flex-grow: 1;
@@ -228,35 +250,67 @@
 
     <div class="grid-layout">
         
-        <!-- Left Column: Inputs -->
-        <div class="simulator-box">
-            <h2>
-                Predict Price 
-                <span id="apiStatus" class="status-badge">Init...</span>
-            </h2>
-            <p style="font-size: 0.9em; color: #666; margin-bottom: 20px;">
-                <span id="sourceText">Connecting to market...</span>
-                <button class="refresh-btn" onclick="fetchMarketData()">Retry</button>
-            </p>
+        <!-- Left Column: Inputs & Portfolio -->
+        <div class="left-col">
+            <!-- Simulator Box -->
+            <div class="box simulator-box">
+                <h2>
+                    Predict Price 
+                    <span id="apiStatus" class="status-badge">Init...</span>
+                </h2>
+                <p style="font-size: 0.9em; color: #666; margin-bottom: 20px;">
+                    <span id="sourceText">Connecting to market...</span>
+                    <button class="refresh-btn" onclick="fetchMarketData()">Retry</button>
+                </p>
 
-            <div class="input-group">
-                <label for="usdInr">USD to INR Rate (₹)</label>
-                <input type="number" id="usdInr" value="90.28" step="0.01">
-                <input type="range" id="usdInrRange" min="85" max="95" step="0.05" value="90.28">
+                <div class="input-group">
+                    <label for="usdInr">USD to INR Rate (₹)</label>
+                    <input type="number" id="usdInr" value="90.28" step="0.01">
+                    <input type="range" id="usdInrRange" min="85" max="95" step="0.05" value="90.28">
+                </div>
+
+                <div class="input-group">
+                    <label for="silverPrice">Int'l Silver Price ($/oz)</label>
+                    <input type="number" id="silverPrice" value="76.67" step="0.01">
+                    <input type="range" id="silverPriceRange" min="60" max="90" step="0.1" value="76.67">
+                </div>
+
+                <div class="result-box">
+                    <h3>Estimated ETF Price</h3>
+                    <div class="price-display" id="calculatedPrice">₹...</div>
+                    <div class="sub-text">Per Unit (Approx 1g)</div>
+                </div>
             </div>
 
-            <div class="input-group">
-                <label for="silverPrice">Int'l Silver Price ($/oz)</label>
-                <input type="number" id="silverPrice" value="76.67" step="0.01">
-                <input type="range" id="silverPriceRange" min="60" max="90" step="0.1" value="76.67">
-            </div>
+            <!-- Investment Portfolio Box -->
+            <div class="box portfolio-box">
+                <h2>Investment Portfolio</h2>
+                
+                <div class="input-group">
+                    <label for="investedAmount">Total Invested Amount (₹)</label>
+                    <input type="number" id="investedAmount" placeholder="e.g. 50000" oninput="saveAndRecalculate()">
+                </div>
 
-            <div class="result-box">
-                <h3>Estimated ETF Price</h3>
-                <div class="price-display" id="calculatedPrice">₹...</div>
-                <div class="sub-text">Per Unit (Approx 1g)</div>
-                <div style="margin-top:10px; font-size: 0.8em; color:#999;">
-                    *Logic: (Silver$ × 32.15 × USD₹ / 1000) × 5.5% Premium
+                <div class="input-group">
+                    <label for="avgPrice">Average Buy Price (₹)</label>
+                    <input type="number" id="avgPrice" placeholder="e.g. 85.50" step="0.01" oninput="saveAndRecalculate()">
+                </div>
+
+                <div class="result-box" style="margin-top: 15px; padding: 15px;">
+                    <h3>Profit / Loss</h3>
+                    <div class="price-display" id="pnlDisplay" style="font-size: 2em;">₹0.00</div>
+                    <div class="sub-text" id="pnlPercent">(0.00%)</div>
+                    
+                    <div class="pnl-grid">
+                        <div class="pnl-item">
+                            <div class="pnl-label">Units Held</div>
+                            <div class="pnl-val" id="unitsHeld">0</div>
+                        </div>
+                        <div class="pnl-item">
+                            <div class="pnl-label">Current Value</div>
+                            <div class="pnl-val" id="currentValue">₹0</div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -286,7 +340,7 @@
 
 <script>
     // --- Data Management ---
-    // Fallback Data (Last known successful values - Dec 2025/Jan 2026)
+    // Fallback Data
     const fallbackHistory = {
         dates: ["Dec 23", "Dec 24", "Dec 26", "Dec 29", "Dec 30", "Dec 31", "Jan 01", "Jan 02", "Jan 05", "Jan 06", "Jan 07", "Jan 08", "Jan 09"],
         etf: [210.38, 217.94, 229.73, 226.25, 226.67, 225.12, 224.95, 231.68, 235.63, 241.68, 244.42, 234.08, 240.40],
@@ -294,13 +348,13 @@
         usd: [89.51, 89.83, 89.83, 89.90, 89.77, 89.96, 89.96, 90.01, 90.23, 90.17, 89.86, 89.91, 90.28]
     };
 
-    // Main Data Container
     let fullHistory = JSON.parse(JSON.stringify(fallbackHistory));
 
     // Constants
     const OZ_TO_KG = 32.1507;
     const KG_TO_GRAM = 1000;
     const PREMIUM_FACTOR = 1.055; 
+    const STORAGE_KEY = 'icici_silver_etf_v2';
 
     // DOM Elements
     const usdInput = document.getElementById('usdInr');
@@ -313,21 +367,83 @@
     const ctx = document.getElementById('silverChart').getContext('2d');
     const statusBadge = document.getElementById('apiStatus');
     const sourceText = document.getElementById('sourceText');
+    
+    // Portfolio Elements
+    const investedInput = document.getElementById('investedAmount');
+    const avgPriceInput = document.getElementById('avgPrice');
+    const pnlDisplay = document.getElementById('pnlDisplay');
+    const pnlPercent = document.getElementById('pnlPercent');
+    const unitsHeldDisplay = document.getElementById('unitsHeld');
+    const currentValueDisplay = document.getElementById('currentValue');
 
     let myChart;
     let currentView = 'etf'; 
     let daysToShow = 14;
+    let currentCalculatedPrice = 0;
+
+    // --- LOCAL STORAGE MANAGER ---
+    function loadState() {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        if (stored) {
+            try {
+                const data = JSON.parse(stored);
+                // Load Investment Data
+                if (data.invested) investedInput.value = data.invested;
+                if (data.avg) avgPriceInput.value = data.avg;
+                // Load Settings
+                if (data.days) {
+                    daysRange.value = data.days;
+                    daysToShow = parseInt(data.days);
+                    daysDisplay.innerText = data.days + " Days";
+                }
+                // Optional: Load Sim Data if you want inputs to persist (Note: Live fetch might override this)
+                if (data.usd) { usdInput.value = data.usd; usdRange.value = data.usd; }
+                if (data.silver) { silverInput.value = data.silver; silverRange.value = data.silver; }
+            } catch (e) {
+                console.error("Failed to load saved state", e);
+            }
+        }
+    }
+
+    function saveState() {
+        const data = {
+            invested: investedInput.value,
+            avg: avgPriceInput.value,
+            days: daysRange.value,
+            usd: usdInput.value,
+            silver: silverInput.value
+        };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    }
+
+    // --- HELPER: ROBUST PROXY FETCHER ---
+    async function fetchWithFallback(targetUrl) {
+        const proxies = [
+            (u) => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
+            (u) => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`,
+            (u) => `https://corsproxy.io/?${encodeURIComponent(u)}`
+        ];
+
+        for (const createProxyUrl of proxies) {
+            try {
+                const res = await fetch(createProxyUrl(targetUrl));
+                if (res.ok) return await res.json();
+            } catch (e) {
+                console.warn("Proxy attempt failed, switching...", e);
+            }
+        }
+        throw new Error("All proxies failed");
+    }
 
     // --- LIVE FETCHING ENGINE ---
     async function fetchMarketData() {
         statusBadge.innerText = "Connecting...";
         statusBadge.className = "status-badge";
-        sourceText.innerText = "Contacting market data...";
-
+        
         let usdSuccess = false;
         let chartSuccess = false;
 
-        // 1. Fetch Live USD/INR (Frankfurter - Reliable)
+        // 1. Live USD/INR
         try {
             const usdRes = await fetch('https://api.frankfurter.app/latest?from=USD&to=INR');
             const usdData = await usdRes.json();
@@ -336,38 +452,29 @@
                 usdInput.value = rate.toFixed(2);
                 usdRange.value = rate.toFixed(2);
                 usdSuccess = true;
+                saveAndRecalculate(); // Save the live updated value
             }
-        } catch (e) {
-            console.warn("USD Fetch failed:", e);
-        }
+        } catch (e) { console.warn("USD Fetch failed:", e); }
 
-        // 2. Fetch History (Yahoo via Proxy - Flaky but rich data)
-        const PROXY_URL = "https://api.allorigins.win/raw?url=";
-        const timestamp = new Date().getTime(); // Cache buster
+        // 2. Chart History
+        const timestamp = new Date().getTime();
+        const baseUrl = "https://query1.finance.yahoo.com/v8/finance/chart/";
+        const params = "?interval=1d&range=1mo&_=" + timestamp;
         
-        const urls = {
-            etf: `${PROXY_URL}${encodeURIComponent('https://query1.finance.yahoo.com/v8/finance/chart/SILVERIETF.NS?interval=1d&range=1mo&_=' + timestamp)}`,
-            silver: `${PROXY_URL}${encodeURIComponent('https://query1.finance.yahoo.com/v8/finance/chart/XAGUSD=X?interval=1d&range=1mo&_=' + timestamp)}`,
-            usd: `${PROXY_URL}${encodeURIComponent('https://query1.finance.yahoo.com/v8/finance/chart/INR=X?interval=1d&range=1mo&_=' + timestamp)}`
-        };
-
         try {
             const [etfRes, silverRes, usdChartRes] = await Promise.all([
-                fetch(urls.etf).then(r => r.json()),
-                fetch(urls.silver).then(r => r.json()),
-                fetch(urls.usd).then(r => r.json())
+                fetchWithFallback(`${baseUrl}SILVERIETF.NS${params}`),
+                fetchWithFallback(`${baseUrl}XAGUSD=X${params}`),
+                fetchWithFallback(`${baseUrl}INR=X${params}`)
             ]);
 
-             // Processor Helper
              const processChart = (data) => {
-                if(!data.chart || !data.chart.result || !data.chart.result[0]) return null;
+                if(!data.chart?.result?.[0]) return null;
                 const res = data.chart.result[0];
                 const quotes = res.indicators.quote[0].close;
                 const timestamps = res.timestamp;
                 
-                const cleanData = [];
-                const cleanDates = [];
-                
+                const cleanData = [], cleanDates = [];
                 for(let i=0; i<quotes.length; i++) {
                     if(quotes[i] != null && timestamps[i] != null) {
                         cleanData.push(quotes[i]);
@@ -391,12 +498,10 @@
                  fullHistory.silver = silverClean.prices.slice(-len).map(p => parseFloat(p.toFixed(2)));
                  fullHistory.usd = usdClean.prices.slice(-len).map(p => parseFloat(p.toFixed(2)));
                  
-                 // If we have live chart data, update inputs to the very latest close
                  const lastSilver = fullHistory.silver[fullHistory.silver.length - 1];
                  silverInput.value = lastSilver;
                  silverRange.value = lastSilver;
                  
-                 // If USD fetch failed earlier, use the chart's last close
                  if (!usdSuccess) {
                      const lastUsd = fullHistory.usd[fullHistory.usd.length - 1];
                      usdInput.value = lastUsd;
@@ -404,12 +509,11 @@
                  }
                  
                  chartSuccess = true;
+                 saveAndRecalculate();
              }
-        } catch (e) {
-            console.warn("Chart Fetch failed:", e);
-        }
+        } catch (e) { console.warn("Chart Fetch failed:", e); }
 
-        // 3. Update Status UI
+        // UI Update
         if (usdSuccess && chartSuccess) {
             statusBadge.innerText = "Live";
             statusBadge.className = "status-badge live";
@@ -428,7 +532,6 @@
             sourceText.innerText = "Fetch failed. Using saved data.";
         }
 
-        calculateETF();
         updateChartDataset(currentView);
     }
 
@@ -494,22 +597,63 @@
         });
     }
 
-    // --- Calculation Logic ---
+    // --- CORE LOGIC ---
+    function saveAndRecalculate() {
+        saveState();
+        calculateETF();
+    }
+
     function calculateETF() {
-        const usd = parseFloat(usdInput.value);
-        const silver = parseFloat(silverInput.value);
+        const usd = parseFloat(usdInput.value) || 0;
+        const silver = parseFloat(silverInput.value) || 0;
+        
+        // ETF Calculation
         const pricePerKgInr = silver * OZ_TO_KG * usd;
         const pricePerGramInr = pricePerKgInr / KG_TO_GRAM;
         const finalPrice = pricePerGramInr * PREMIUM_FACTOR;
-
+        
+        currentCalculatedPrice = finalPrice;
         priceDisplay.textContent = "₹" + finalPrice.toFixed(2);
+        
         if(currentView === 'etf') updateChartProjection(finalPrice);
+        
+        calculatePortfolio();
+    }
+
+    function calculatePortfolio() {
+        const invested = parseFloat(investedInput.value) || 0;
+        const avgPrice = parseFloat(avgPriceInput.value) || 0;
+
+        if (invested > 0 && avgPrice > 0) {
+            const units = invested / avgPrice;
+            const currentValue = units * currentCalculatedPrice;
+            const profit = currentValue - invested;
+            const percentage = (profit / invested) * 100;
+
+            unitsHeldDisplay.textContent = units.toFixed(2);
+            currentValueDisplay.textContent = "₹" + currentValue.toFixed(2);
+            
+            pnlDisplay.textContent = (profit >= 0 ? "+" : "") + "₹" + profit.toFixed(2);
+            pnlPercent.textContent = "(" + (percentage >= 0 ? "+" : "") + percentage.toFixed(2) + "%)";
+            
+            // Color Logic
+            const color = profit >= 0 ? 'var(--green)' : 'var(--primary)';
+            pnlDisplay.style.color = color;
+            pnlPercent.style.color = color;
+            
+        } else {
+            unitsHeldDisplay.textContent = "0";
+            currentValueDisplay.textContent = "₹0";
+            pnlDisplay.textContent = "₹0.00";
+            pnlPercent.textContent = "(0.00%)";
+            pnlDisplay.style.color = "#333";
+        }
     }
 
     // --- Sync Inputs ---
     function syncInputs(source, target) {
         target.value = source.value;
-        calculateETF();
+        saveAndRecalculate();
     }
 
     usdInput.addEventListener('input', () => syncInputs(usdInput, usdRange));
@@ -517,10 +661,11 @@
     silverInput.addEventListener('input', () => syncInputs(silverInput, silverRange));
     silverRange.addEventListener('input', () => syncInputs(silverRange, silverInput));
 
-    // --- History Range Control ---
+    // --- History Range ---
     daysRange.addEventListener('input', (e) => {
         daysToShow = parseInt(e.target.value);
         daysDisplay.textContent = daysToShow + " Days";
+        saveState(); // Save setting
         updateChartDataset(currentView); 
     });
 
@@ -558,12 +703,10 @@
         gradient.addColorStop(0, hexToRgba(color, 0.2));
         gradient.addColorStop(1, hexToRgba(color, 0.0));
         myChart.data.datasets[0].backgroundColor = gradient;
-
         myChart.data.datasets[0].pointBackgroundColor = '#fff';
         delete myChart.data.datasets[0].segment; 
 
         myChart.update();
-
         if (view === 'etf') calculateETF();
     }
 
@@ -585,7 +728,6 @@
         myChart.data.datasets[0].segment = {
             borderDash: ctx => ctx.p0DataIndex === sliced.etf.length - 1 ? [6, 6] : undefined
         };
-
         myChart.update();
     }
 
@@ -597,10 +739,10 @@
     }
 
     // Initialize
-    initChart();
-    calculateETF();
-    // Start Fetch
-    setTimeout(fetchMarketData, 500);
+    loadState(); // 1. Load saved user inputs
+    initChart(); // 2. Build graph (with saved inputs or fallback)
+    calculateETF(); // 3. Run initial calc
+    setTimeout(fetchMarketData, 500); // 4. Try to fetch live data
 
 </script>
 
