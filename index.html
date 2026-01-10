@@ -354,7 +354,8 @@
     const OZ_TO_KG = 32.1507;
     const KG_TO_GRAM = 1000;
     const PREMIUM_FACTOR = 1.055; 
-    const STORAGE_KEY = 'icici_silver_etf_v2';
+    const USER_STORAGE_KEY = 'icici_silver_etf_v2';
+    const HISTORY_STORAGE_KEY = 'icici_silver_etf_history_v2';
 
     // DOM Elements
     const usdInput = document.getElementById('usdInr');
@@ -380,10 +381,11 @@
     let currentView = 'etf'; 
     let daysToShow = 14;
     let currentCalculatedPrice = 0;
+    let currentDate = new Date().toISOString().split('T')[0];
 
     // --- LOCAL STORAGE MANAGER ---
-    function loadState() {
-        const stored = localStorage.getItem(STORAGE_KEY);
+    function loadUserState() {
+        const stored = localStorage.getItem(USER_STORAGE_KEY);
         if (stored) {
             try {
                 const data = JSON.parse(stored);
@@ -396,16 +398,16 @@
                     daysToShow = parseInt(data.days);
                     daysDisplay.innerText = data.days + " Days";
                 }
-                // Optional: Load Sim Data if you want inputs to persist (Note: Live fetch might override this)
+                // Load Sim Data
                 if (data.usd) { usdInput.value = data.usd; usdRange.value = data.usd; }
                 if (data.silver) { silverInput.value = data.silver; silverRange.value = data.silver; }
             } catch (e) {
-                console.error("Failed to load saved state", e);
+                console.error("Failed to load saved user state", e);
             }
         }
     }
 
-    function saveState() {
+    function saveUserState() {
         const data = {
             invested: investedInput.value,
             avg: avgPriceInput.value,
@@ -413,7 +415,41 @@
             usd: usdInput.value,
             silver: silverInput.value
         };
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(data));
+    }
+
+    function loadHistory() {
+        const stored = localStorage.getItem(HISTORY_STORAGE_KEY);
+        if (stored) {
+            try {
+                const data = JSON.parse(stored);
+                if (data.lastFetchDate === currentDate && data.fullHistory) {
+                    fullHistory = data.fullHistory;
+                    statusBadge.innerText = "Cached";
+                    statusBadge.className = "status-badge partial";
+                    sourceText.innerText = "Using cached data from today.";
+                    // Set inputs to cached live values
+                    const len = fullHistory.dates.length;
+                    usdInput.value = fullHistory.usd[len - 1].toFixed(2);
+                    usdRange.value = usdInput.value;
+                    silverInput.value = fullHistory.silver[len - 1].toFixed(2);
+                    silverRange.value = silverInput.value;
+                    saveUserState(); // Save the restored values
+                    return true;
+                }
+            } catch (e) {
+                console.error("Failed to load saved history", e);
+            }
+        }
+        return false;
+    }
+
+    function saveHistory() {
+        const data = {
+            fullHistory: fullHistory,
+            lastFetchDate: currentDate
+        };
+        localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(data));
     }
 
     // --- HELPER: ROBUST PROXY FETCHER ---
@@ -452,7 +488,7 @@
                 usdInput.value = rate.toFixed(2);
                 usdRange.value = rate.toFixed(2);
                 usdSuccess = true;
-                saveAndRecalculate(); // Save the live updated value
+                saveUserState();
             }
         } catch (e) { console.warn("USD Fetch failed:", e); }
 
@@ -464,7 +500,7 @@
         try {
             const [etfRes, silverRes, usdChartRes] = await Promise.all([
                 fetchWithFallback(`${baseUrl}SILVERIETF.NS${params}`),
-                fetchWithFallback(`${baseUrl}XAGUSD=X${params}`),
+                fetchWithFallback(`${baseUrl}SI=F${params}`),
                 fetchWithFallback(`${baseUrl}INR=X${params}`)
             ]);
 
@@ -499,17 +535,18 @@
                  fullHistory.usd = usdClean.prices.slice(-len).map(p => parseFloat(p.toFixed(2)));
                  
                  const lastSilver = fullHistory.silver[fullHistory.silver.length - 1];
-                 silverInput.value = lastSilver;
+                 silverInput.value = lastSilver.toFixed(2);
                  silverRange.value = lastSilver;
                  
                  if (!usdSuccess) {
                      const lastUsd = fullHistory.usd[fullHistory.usd.length - 1];
-                     usdInput.value = lastUsd;
+                     usdInput.value = lastUsd.toFixed(2);
                      usdRange.value = lastUsd;
                  }
                  
                  chartSuccess = true;
-                 saveAndRecalculate();
+                 saveHistory();
+                 saveUserState();
              }
         } catch (e) { console.warn("Chart Fetch failed:", e); }
 
@@ -599,7 +636,7 @@
 
     // --- CORE LOGIC ---
     function saveAndRecalculate() {
-        saveState();
+        saveUserState();
         calculateETF();
     }
 
@@ -665,7 +702,7 @@
     daysRange.addEventListener('input', (e) => {
         daysToShow = parseInt(e.target.value);
         daysDisplay.textContent = daysToShow + " Days";
-        saveState(); // Save setting
+        saveUserState();
         updateChartDataset(currentView); 
     });
 
@@ -739,10 +776,16 @@
     }
 
     // Initialize
-    loadState(); // 1. Load saved user inputs
-    initChart(); // 2. Build graph (with saved inputs or fallback)
-    calculateETF(); // 3. Run initial calc
-    setTimeout(fetchMarketData, 500); // 4. Try to fetch live data
+    currentDate = new Date().toISOString().split('T')[0];
+    loadUserState(); // Load user inputs
+    const hasValidCache = loadHistory(); // Load history if valid for today
+    initChart();
+    calculateETF();
+    if (!hasValidCache) {
+        setTimeout(fetchMarketData, 500);
+    } else {
+        updateChartDataset(currentView);
+    }
 
 </script>
 
