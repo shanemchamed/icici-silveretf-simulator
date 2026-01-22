@@ -7,6 +7,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
+            /* Light Theme Variables */
             --bg-body: #f0f2f5;
             --bg-card: #ffffff;
             --text-main: #1a1a1a;
@@ -16,6 +17,7 @@
             --input-border: #cbd5e1;
             --highlight-bg: #f8fafc;
             
+            /* Brand Colors */
             --icici-color: #e74c3c;
             --nippon-color: #2980b9;
             --total-color: #10b981;
@@ -26,12 +28,15 @@
             --total-bg: linear-gradient(135deg, #10b981 0%, #059669 100%);
             --total-text: #ffffff;
             
+            /* UI Elements */
             --shadow-sm: 0 1px 3px rgba(0,0,0,0.1);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1);
             --radius: 16px;
             --transition: all 0.3s ease;
         }
 
         [data-theme="dark"] {
+            /* Dark Theme Overrides */
             --bg-body: #0f172a;
             --bg-card: #1e293b;
             --text-main: #f1f5f9;
@@ -61,14 +66,24 @@
             line-height: 1.5;
         }
 
-        .container { max-width: 1200px; margin: 0 auto; }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
 
+        /* Header & Nav */
         .app-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 30px;
             padding: 10px 0;
+        }
+        
+        .header-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
         }
 
         h1 {
@@ -80,7 +95,7 @@
             -webkit-text-fill-color: transparent;
         }
 
-        .theme-toggle {
+        .theme-toggle, .debug-toggle {
             background: var(--bg-card);
             border: 1px solid var(--border-color);
             color: var(--text-main);
@@ -93,8 +108,16 @@
             gap: 8px;
             transition: var(--transition);
             box-shadow: var(--shadow-sm);
+            font-size: 0.9rem;
         }
+        .theme-toggle:hover, .debug-toggle:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .debug-toggle input { margin: 0; cursor: pointer; }
 
+        /* Grid Layout */
         .dashboard-grid {
             display: grid;
             grid-template-columns: 350px 1fr;
@@ -102,8 +125,13 @@
             align-items: start;
         }
 
-        .left-col { display: flex; flex-direction: column; gap: 24px; }
+        .left-col {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
 
+        /* Cards */
         .card {
             background: var(--bg-card);
             border-radius: var(--radius);
@@ -111,6 +139,11 @@
             border: 1px solid var(--border-color);
             box-shadow: var(--shadow-sm);
             transition: var(--transition);
+        }
+
+        .card:hover {
+            box-shadow: var(--shadow-md);
+            border-color: var(--nippon-color);
         }
 
         .card h2 {
@@ -125,21 +158,31 @@
             align-items: center;
         }
 
+        /* Specific Card Accents */
         .card.icici h2 { border-color: var(--icici-color); }
         .card.nippon h2 { border-color: var(--nippon-color); }
         .card.market h2 { border-color: var(--text-muted); }
 
+        /* Total Summary Card (Premium Look) */
         .card.total-summary {
             background: var(--total-bg);
             color: var(--total-text);
             border: none;
         }
-        .card.total-summary h2 { border-color: rgba(255,255,255,0.3); color: white; }
-        .card.total-summary .sub-text { color: rgba(255,255,255,0.8); }
-        .card.total-summary .price-display, 
-        .card.total-summary .pnl-positive, 
-        .card.total-summary .pnl-negative { color: white !important; }
+        .card.total-summary h2 {
+            border-color: rgba(255,255,255,0.3);
+            color: white;
+        }
+        .card.total-summary .sub-text {
+            color: rgba(255,255,255,0.8);
+        }
+        .card.total-summary .price-display,
+        .card.total-summary .pnl-positive,
+        .card.total-summary .pnl-negative {
+            color: white !important;
+        }
 
+        /* Inputs */
         .input-group { margin-bottom: 16px; }
         .input-group label {
             display: flex;
@@ -161,7 +204,11 @@
             box-sizing: border-box;
             transition: var(--transition);
         }
-        input[type="number"]:focus { outline: none; border-color: var(--nippon-color); }
+        input[type="number"]:focus {
+            outline: none;
+            border-color: var(--nippon-color);
+            box-shadow: 0 0 0 3px rgba(41, 128, 185, 0.1);
+        }
 
         input[type="range"] {
             width: 100%;
@@ -178,13 +225,25 @@
             background: var(--nippon-color);
             border-radius: 50%;
             cursor: pointer;
+            transition: transform 0.1s;
+        }
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
         }
 
-        .price-display { font-size: 1.75rem; font-weight: 800; letter-spacing: -0.5px; margin: 4px 0; }
+        /* Typography */
+        .price-display {
+            font-size: 1.75rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            margin: 4px 0;
+        }
         .sub-text { font-size: 0.8rem; color: var(--text-muted); }
+
         .pnl-positive { color: var(--total-color); font-weight: bold; }
         .pnl-negative { color: var(--icici-color); font-weight: bold; }
 
+        /* Chart/Table Area */
         .view-container {
             height: 450px;
             position: relative;
@@ -201,6 +260,7 @@
             gap: 15px;
         }
 
+        /* Tabs Styling */
         .analytics-tabs {
             display: flex;
             gap: 5px;
@@ -220,6 +280,9 @@
             cursor: pointer;
             transition: var(--transition);
             white-space: nowrap;
+        }
+        .analytics-tabs button:hover {
+            background: rgba(0,0,0,0.05);
         }
         .analytics-tabs button.active {
             background: var(--bg-card);
@@ -243,6 +306,7 @@
             font-weight: 600;
             color: var(--text-muted);
             cursor: pointer;
+            transition: var(--transition);
         }
         .view-switch button.active {
             background: var(--bg-card);
@@ -263,6 +327,7 @@
         .status-badge.static { background: rgba(59, 130, 246, 0.15); color: #2563eb; }
         .status-badge.error { background: rgba(231, 76, 60, 0.15); color: var(--icici-color); }
 
+        /* Data Table Styles */
         .data-table {
             width: 100%;
             border-collapse: collapse;
@@ -283,9 +348,18 @@
             background: var(--bg-card);
             z-index: 10;
         }
-        .data-table th:first-child, .data-table td:first-child { text-align: left; }
-        .data-table tr:hover { background-color: var(--highlight-bg); }
-        .tab-indicator { font-size: 0.75em; color: var(--text-muted); font-weight: normal; display: block; }
+        .data-table th:first-child, .data-table td:first-child {
+            text-align: left;
+        }
+        .data-table tr:hover {
+            background-color: var(--highlight-bg);
+        }
+        .tab-indicator {
+            font-size: 0.75em;
+            color: var(--text-muted);
+            font-weight: normal;
+            display: block;
+        }
         
         .data-meta {
             background: var(--highlight-bg);
@@ -298,6 +372,30 @@
         }
         .data-meta strong { color: var(--text-main); }
 
+        /* Debug Console */
+        .debug-console {
+            display: none;
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 25px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #333;
+        }
+        .debug-console.visible {
+            display: block;
+        }
+        .log-entry { margin-bottom: 5px; border-bottom: 1px solid #333; padding-bottom: 2px; }
+        .log-time { color: #569cd6; margin-right: 8px; }
+        .log-error { color: #f44747; }
+        .log-success { color: #6a9955; }
+        .log-info { color: #9cdcfe; }
+
+        /* Responsive */
         @media (max-width: 900px) {
             .dashboard-grid { grid-template-columns: 1fr; }
             .chart-header { flex-direction: column; align-items: flex-start; }
@@ -311,9 +409,14 @@
     
     <div class="app-header">
         <h1>Silver ETF Simulator</h1>
-        <button class="theme-toggle" onclick="toggleTheme()">
-            <span id="themeIcon">🌙</span> <span id="themeText">Dark Mode</span>
-        </button>
+        <div class="header-controls">
+            <label class="debug-toggle">
+                <input type="checkbox" id="debugToggle" onchange="toggleDebug()"> Debug API
+            </label>
+            <button class="theme-toggle" onclick="toggleTheme()">
+                <span id="themeIcon">🌙</span> <span id="themeText">Dark Mode</span>
+            </button>
+        </div>
     </div>
 
     <div class="dashboard-grid">
@@ -334,7 +437,7 @@
                         <span>Source: <strong id="dataSourceLabel">...</strong></span>
                         <span id="lastUpdateLabel">...</span>
                     </div>
-                    <div id="dataDescLabel">Loading...</div>
+                    <div id="dataDescLabel" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor:help;" title="">Loading...</div>
                 </div>
 
                 <div class="input-group">
@@ -496,6 +599,15 @@
                 </div>
             </div>
 
+            <!-- DEBUG CONSOLE -->
+            <div id="debugConsole" class="debug-console">
+                <div style="border-bottom:1px solid #444; margin-bottom:5px; padding-bottom:5px; display:flex; justify-content:space-between;">
+                    <strong>API Debug Console</strong>
+                    <button onclick="document.getElementById('debugLog').innerHTML=''" style="background:none; border:none; color:#888; cursor:pointer;">Clear</button>
+                </div>
+                <div id="debugLog"></div>
+            </div>
+
         </div>
     </div>
 </div>
@@ -532,8 +644,34 @@
         }
     }
 
+    // --- DEBUG LOGIC ---
+    let debugMode = false;
+    function toggleDebug() {
+        debugMode = document.getElementById('debugToggle').checked;
+        const consoleEl = document.getElementById('debugConsole');
+        if(debugMode) {
+            consoleEl.classList.add('visible');
+            logDebug("Debug Mode Enabled", "info");
+        } else {
+            consoleEl.classList.remove('visible');
+        }
+    }
+
+    function logDebug(msg, type = "info") {
+        if(!debugMode) return;
+        const log = document.getElementById('debugLog');
+        const time = new Date().toLocaleTimeString();
+        const div = document.createElement('div');
+        div.className = 'log-entry';
+        div.innerHTML = `<span class="log-time">[${time}]</span> <span class="log-${type}">${msg}</span>`;
+        log.appendChild(div);
+        // Auto scroll
+        const container = document.getElementById('debugConsole');
+        container.scrollTop = container.scrollHeight;
+    }
+
     // --- Configuration ---
-    const STORAGE_KEY = 'silver_portfolio_v18';
+    const STORAGE_KEY = 'silver_portfolio_v25';
     const OZ_TO_KG = 32.1507;
     const KG_TO_GRAM = 1000;
     
@@ -606,6 +744,7 @@
         dataSourceLabel.innerText = source;
         lastUpdateLabel.innerText = time;
         dataDescLabel.innerText = desc;
+        dataDescLabel.title = desc; // Add full error on hover
         apiStatus.innerText = source === "Live API" ? "Live" : (source === "Cached Data" ? "Cached" : "Static");
         apiStatus.className = `status-badge ${statusClass}`;
     }
@@ -655,6 +794,10 @@
             const usd = historyData.usd[i];
             const icici = historyData.icici[i];
             const nippon = historyData.nippon[i];
+            
+            // Logic: 
+            // 1. Fair Value (₹/g) = (Silver_USD * 32.1507 * USD_INR) / 1000
+            // 2. Premium % = ((ETF - FairValue) / FairValue) * 100
             
             const fairValue = (silver * OZ_TO_KG * usd) / KG_TO_GRAM;
             
@@ -965,79 +1108,139 @@
     }
 
     async function fetchWithFallback(url) {
+        // Expanded Proxy List with robust wrappers
         const proxies = [
-            u => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
-            u => `https://corsproxy.io/?${encodeURIComponent(u)}`
+            u => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`, // Changed to /raw for direct JSON
+            u => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`,
+            u => `https://corsproxy.io/?${encodeURIComponent(u)}`,
+            u => `https://thingproxy.freeboard.io/fetch/${u}`
         ];
-        for(let p of proxies) {
+        
+        let errorLog = [];
+        
+        for(let i=0; i<proxies.length; i++) {
+            const p = proxies[i];
             try {
-                let res = await fetch(p(url));
-                if(res.ok) return await res.json();
-            } catch(e) {}
+                logDebug(`Attempting Proxy ${i+1}: ${p(url)}`, "info");
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 10000); 
+                
+                const proxyUrl = p(url);
+                const res = await fetch(proxyUrl, { signal: controller.signal });
+                clearTimeout(timeoutId);
+                
+                if(res.ok) {
+                    const text = await res.text();
+                    try {
+                        const json = JSON.parse(text);
+                        
+                        // Handle AllOrigins specific wrapper if not using /raw
+                        if (json.contents) {
+                            try {
+                                const inner = JSON.parse(json.contents);
+                                if (inner.chart && inner.chart.result) return inner;
+                            } catch(e) {
+                                // contents might be raw string
+                            }
+                        }
+
+                        // Standard Yahoo JSON validation
+                        if(json.chart && json.chart.result && json.chart.result.length > 0) {
+                            return json;
+                        }
+                    } catch(parseErr) {
+                        logDebug(`Proxy ${i+1} JSON Parse Error: ${parseErr.message}`, "error");
+                    }
+                }
+                errorLog.push(`Proxy ${i+1}: Invalid Response (HTTP ${res.status})`);
+                logDebug(`Proxy ${i+1} Failed: HTTP ${res.status}`, "error");
+            } catch(e) {
+                const reason = e.name === 'AbortError' ? 'Timeout' : e.message;
+                errorLog.push(`Proxy ${i+1}: ${reason}`);
+                logDebug(`Proxy ${i+1} Exception: ${reason}`, "error");
+            }
         }
-        throw new Error("Failed");
+        throw new Error("All proxies failed. " + errorLog.join(", "));
     }
 
     window.fetchMarketData = async function() {
         const statusText = document.getElementById('apiStatus');
-        updateStatusUI("Updating...", "...", "Fetching latest market data...", "live");
+        updateStatusUI("Updating...", "...", "Attempting to fetch live market data...", "live");
+        logDebug("Starting Fetch...", "info");
         
-        // 1. Fetch Live USD/INR
+        const ts = Date.now();
+        // Use query2 to potentially avoid blocks
+        const base = "https://query2.finance.yahoo.com/v8/finance/chart/";
+        const params = "?interval=1d&range=5d&_=" + ts; 
+
+        // 1. Live USD (Frankfurter)
+        let liveUsd = null;
         try {
             const usdRes = await fetch('https://api.frankfurter.app/latest?from=USD&to=INR');
             const usdData = await usdRes.json();
             if(usdData?.rates?.INR) {
-                usdInput.value = usdData.rates.INR.toFixed(2);
-                document.getElementById('usdInrRange').value = usdData.rates.INR;
+                liveUsd = usdData.rates.INR;
+                usdInput.value = liveUsd.toFixed(2);
+                document.getElementById('usdInrRange').value = liveUsd;
+                logDebug(`USD Fetch Success: ₹${liveUsd}`, "success");
             }
-        } catch(e) { console.warn("USD fetch failed"); }
+        } catch(e) { 
+            console.warn("USD fetch failed"); 
+            logDebug("USD Fetch Failed", "error");
+        }
 
-        // 2. Fetch Live Silver (Yahoo via proxy)
-        const ts = Date.now();
-        const silverUrl = `https://query1.finance.yahoo.com/v8/finance/chart/XAGUSD=X?interval=1m&range=1d&_=${ts}`;
+        // 2. Live Silver (Yahoo via proxy)
+        const silverUrl = `${base}XAGUSD=X${params}`;
         
         try {
             const silverData = await fetchWithFallback(silverUrl);
-            if(silverData?.chart?.result?.[0]?.meta?.regularMarketPrice) {
-                const liveSilver = silverData.chart.result[0].meta.regularMarketPrice;
+            
+            // Validate deeply
+            const result = silverData?.chart?.result?.[0];
+            if(result?.meta?.regularMarketPrice) {
+                const liveSilver = result.meta.regularMarketPrice;
                 silverInput.value = liveSilver.toFixed(2);
                 document.getElementById('silverPriceRange').value = liveSilver;
                 
-                // Add Dynamic Data Point to History
+                logDebug(`Silver Fetch Success: $${liveSilver}`, "success");
+                
                 const todayStr = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: '2-digit' }).replace(/ /g, '-');
-                const liveUsd = parseFloat(usdInput.value);
-                const liveFairValue = (liveSilver * OZ_TO_KG * liveUsd) / KG_TO_GRAM;
-                const livePrem = parseFloat(premiumRange.value) / 100;
                 
-                // Calc Estimated ETF Price
-                const estIcici = liveFairValue * (1 + livePrem);
-                const estNippon = estIcici * 0.99; 
-                
-                // Only push if last point isn't today (simple check)
                 const lastDate = historyData.dates[historyData.dates.length-1];
-                if(lastDate !== todayStr && lastDate.indexOf("Live") === -1) {
+                const currentUsdVal = liveUsd || parseFloat(usdInput.value);
+                const base = (liveSilver * OZ_TO_KG * currentUsdVal) / KG_TO_GRAM;
+                
+                const estIcici = base * (1 + (globalPremiumPercent/100));
+                const estNippon = estIcici * 0.99;
+
+                // Update logic: if last point is NOT today, append. If it IS today (live), update.
+                if(lastDate.indexOf("Live") === -1 && lastDate !== todayStr) {
                     historyData.dates.push(todayStr + " (Live)");
                     historyData.silver.push(liveSilver);
-                    historyData.usd.push(liveUsd);
+                    historyData.usd.push(currentUsdVal);
                     historyData.icici.push(estIcici);
                     historyData.nippon.push(estNippon);
                 } else {
-                    // Update last point
                     const idx = historyData.dates.length - 1;
+                    historyData.dates[idx] = todayStr + " (Live)"; 
                     historyData.silver[idx] = liveSilver;
-                    historyData.usd[idx] = liveUsd;
+                    historyData.usd[idx] = currentUsdVal;
                     historyData.icici[idx] = estIcici;
                     historyData.nippon[idx] = estNippon;
                 }
                 
                 updateStatusUI("Live API", new Date().toLocaleTimeString(), "Yahoo Finance (Silver) & Frankfurter (USD)", "live");
+            } else {
+                 throw new Error("Missing Price Data");
             }
         } catch(e) {
-            console.warn("Silver fetch failed", e);
-            updateStatusUI("Cached/Static", new Date().toLocaleTimeString(), "Live fetch failed. Using stored data.", "error"); 
+            console.warn("Fetch failed", e);
+            logDebug(`Fetch Chain Failed: ${e.message}`, "error");
+            // Fallback to offline mode gracefully
+            updateStatusUI("Offline Mode", new Date().toLocaleTimeString(), "Using accurate internal data.", "error");
         }
-        
-        calculatePortfolio(); 
+
+        calculatePortfolio();
         saveState();
     }
 
