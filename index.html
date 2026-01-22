@@ -7,7 +7,6 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
-            /* Light Theme Variables */
             --bg-body: #f0f2f5;
             --bg-card: #ffffff;
             --text-main: #1a1a1a;
@@ -17,7 +16,6 @@
             --input-border: #cbd5e1;
             --highlight-bg: #f8fafc;
             
-            /* Brand Colors */
             --icici-color: #e74c3c;
             --nippon-color: #2980b9;
             --total-color: #10b981;
@@ -28,15 +26,12 @@
             --total-bg: linear-gradient(135deg, #10b981 0%, #059669 100%);
             --total-text: #ffffff;
             
-            /* UI Elements */
             --shadow-sm: 0 1px 3px rgba(0,0,0,0.1);
-            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1);
             --radius: 16px;
             --transition: all 0.3s ease;
         }
 
         [data-theme="dark"] {
-            /* Dark Theme Overrides */
             --bg-body: #0f172a;
             --bg-card: #1e293b;
             --text-main: #f1f5f9;
@@ -66,12 +61,8 @@
             line-height: 1.5;
         }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
+        .container { max-width: 1200px; margin: 0 auto; }
 
-        /* Header & Nav */
         .app-header {
             display: flex;
             justify-content: space-between;
@@ -103,12 +94,7 @@
             transition: var(--transition);
             box-shadow: var(--shadow-sm);
         }
-        .theme-toggle:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-md);
-        }
 
-        /* Grid Layout */
         .dashboard-grid {
             display: grid;
             grid-template-columns: 350px 1fr;
@@ -116,13 +102,8 @@
             align-items: start;
         }
 
-        .left-col {
-            display: flex;
-            flex-direction: column;
-            gap: 24px;
-        }
+        .left-col { display: flex; flex-direction: column; gap: 24px; }
 
-        /* Cards */
         .card {
             background: var(--bg-card);
             border-radius: var(--radius);
@@ -130,11 +111,6 @@
             border: 1px solid var(--border-color);
             box-shadow: var(--shadow-sm);
             transition: var(--transition);
-        }
-
-        .card:hover {
-            box-shadow: var(--shadow-md);
-            border-color: var(--nippon-color);
         }
 
         .card h2 {
@@ -149,31 +125,21 @@
             align-items: center;
         }
 
-        /* Specific Card Accents */
         .card.icici h2 { border-color: var(--icici-color); }
         .card.nippon h2 { border-color: var(--nippon-color); }
         .card.market h2 { border-color: var(--text-muted); }
 
-        /* Total Summary Card (Premium Look) */
         .card.total-summary {
             background: var(--total-bg);
             color: var(--total-text);
             border: none;
         }
-        .card.total-summary h2 {
-            border-color: rgba(255,255,255,0.3);
-            color: white;
-        }
-        .card.total-summary .sub-text {
-            color: rgba(255,255,255,0.8);
-        }
-        .card.total-summary .price-display,
-        .card.total-summary .pnl-positive,
-        .card.total-summary .pnl-negative {
-            color: white !important;
-        }
+        .card.total-summary h2 { border-color: rgba(255,255,255,0.3); color: white; }
+        .card.total-summary .sub-text { color: rgba(255,255,255,0.8); }
+        .card.total-summary .price-display, 
+        .card.total-summary .pnl-positive, 
+        .card.total-summary .pnl-negative { color: white !important; }
 
-        /* Inputs */
         .input-group { margin-bottom: 16px; }
         .input-group label {
             display: flex;
@@ -195,11 +161,7 @@
             box-sizing: border-box;
             transition: var(--transition);
         }
-        input[type="number"]:focus {
-            outline: none;
-            border-color: var(--nippon-color);
-            box-shadow: 0 0 0 3px rgba(41, 128, 185, 0.1);
-        }
+        input[type="number"]:focus { outline: none; border-color: var(--nippon-color); }
 
         input[type="range"] {
             width: 100%;
@@ -216,25 +178,13 @@
             background: var(--nippon-color);
             border-radius: 50%;
             cursor: pointer;
-            transition: transform 0.1s;
-        }
-        input[type="range"]::-webkit-slider-thumb:hover {
-            transform: scale(1.2);
         }
 
-        /* Typography */
-        .price-display {
-            font-size: 1.75rem;
-            font-weight: 800;
-            letter-spacing: -0.5px;
-            margin: 4px 0;
-        }
+        .price-display { font-size: 1.75rem; font-weight: 800; letter-spacing: -0.5px; margin: 4px 0; }
         .sub-text { font-size: 0.8rem; color: var(--text-muted); }
-
         .pnl-positive { color: var(--total-color); font-weight: bold; }
         .pnl-negative { color: var(--icici-color); font-weight: bold; }
 
-        /* Chart/Table Area */
         .view-container {
             height: 450px;
             position: relative;
@@ -251,7 +201,6 @@
             gap: 15px;
         }
 
-        /* Tabs Styling */
         .analytics-tabs {
             display: flex;
             gap: 5px;
@@ -271,9 +220,6 @@
             cursor: pointer;
             transition: var(--transition);
             white-space: nowrap;
-        }
-        .analytics-tabs button:hover {
-            background: rgba(0,0,0,0.05);
         }
         .analytics-tabs button.active {
             background: var(--bg-card);
@@ -297,7 +243,6 @@
             font-weight: 600;
             color: var(--text-muted);
             cursor: pointer;
-            transition: var(--transition);
         }
         .view-switch button.active {
             background: var(--bg-card);
@@ -314,9 +259,10 @@
             font-weight: 600;
         }
         .status-badge.live { background: rgba(16, 185, 129, 0.15); color: var(--total-color); }
+        .status-badge.cached { background: rgba(234, 179, 8, 0.15); color: #d97706; }
+        .status-badge.static { background: rgba(59, 130, 246, 0.15); color: #2563eb; }
         .status-badge.error { background: rgba(231, 76, 60, 0.15); color: var(--icici-color); }
 
-        /* Data Table Styles */
         .data-table {
             width: 100%;
             border-collapse: collapse;
@@ -337,24 +283,24 @@
             background: var(--bg-card);
             z-index: 10;
         }
-        .data-table th:first-child, .data-table td:first-child {
-            text-align: left;
-        }
-        .data-table tr:hover {
-            background-color: var(--highlight-bg);
-        }
-        .tab-indicator {
-            font-size: 0.75em;
+        .data-table th:first-child, .data-table td:first-child { text-align: left; }
+        .data-table tr:hover { background-color: var(--highlight-bg); }
+        .tab-indicator { font-size: 0.75em; color: var(--text-muted); font-weight: normal; display: block; }
+        
+        .data-meta {
+            background: var(--highlight-bg);
+            border: 1px solid var(--border-color);
+            padding: 10px 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 0.8rem;
             color: var(--text-muted);
-            font-weight: normal;
-            display: block;
         }
+        .data-meta strong { color: var(--text-main); }
 
-        /* Responsive */
         @media (max-width: 900px) {
             .dashboard-grid { grid-template-columns: 1fr; }
             .chart-header { flex-direction: column; align-items: flex-start; }
-            .view-container { height: auto; min-height: 400px; }
             .analytics-tabs { width: 100%; justify-content: space-between; }
         }
     </style>
@@ -381,6 +327,16 @@
                     Market Factors
                     <span id="apiStatus" class="status-badge">Init...</span>
                 </h2>
+                
+                <!-- Data Status Details -->
+                <div class="data-meta">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+                        <span>Source: <strong id="dataSourceLabel">...</strong></span>
+                        <span id="lastUpdateLabel">...</span>
+                    </div>
+                    <div id="dataDescLabel">Loading...</div>
+                </div>
+
                 <div class="input-group">
                     <label>USD to INR (₹)</label>
                     <input type="number" id="usdInr" value="91.63" step="0.01" oninput="syncInputs('usdInr', 'usdInrRange')">
@@ -577,14 +533,14 @@
     }
 
     // --- Configuration ---
-    const STORAGE_KEY = 'silver_portfolio_v17';
+    const STORAGE_KEY = 'silver_portfolio_v18';
     const OZ_TO_KG = 32.1507;
     const KG_TO_GRAM = 1000;
     
-    let globalPremiumPercent = 1.2; // ~1.2% based on latest data
+    let globalPremiumPercent = 1.2;
     let currentChartType = 'portfolio';
 
-    // --- Exact Data Provided by User ---
+    // --- Exact Data Provided by User (Default/Static) ---
     const staticData = [
         { d: "22-Jan-26", ag: 93.53, usd: 91.63, ic: 278.9, nip: 276.3 },
         { d: "21-Jan-26", ag: 93.17, usd: 91.65, ic: 321.5, nip: 308.0 },
@@ -608,15 +564,18 @@
         { d: "22-Dec-25", ag: 69.12, usd: 89.66, ic: 202.0, nip: 200.0 }
     ];
 
-    const sortedData = [...staticData].reverse();
+    const sortedStatic = [...staticData].reverse();
     
-    let historyData = {
-        dates: sortedData.map(d => d.d),
-        icici: sortedData.map(d => d.ic),
-        nippon: sortedData.map(d => d.nip),
-        silver: sortedData.map(d => d.ag),
-        usd: sortedData.map(d => d.usd)
+    // Default Static Data Structure
+    const defaultHistoryData = {
+        dates: sortedStatic.map(d => d.d),
+        icici: sortedStatic.map(d => d.ic),
+        nippon: sortedStatic.map(d => d.nip),
+        silver: sortedStatic.map(d => d.ag),
+        usd: sortedStatic.map(d => d.usd)
     };
+
+    let historyData = JSON.parse(JSON.stringify(defaultHistoryData));
 
     // --- Elements ---
     const usdInput = document.getElementById('usdInr');
@@ -635,6 +594,21 @@
     const totalInvEl = document.getElementById('totalInvested');
     const totalValEl = document.getElementById('totalValue');
     const totalPnlEl = document.getElementById('totalPnl');
+    
+    // Status Elements
+    const dataSourceLabel = document.getElementById('dataSourceLabel');
+    const lastUpdateLabel = document.getElementById('lastUpdateLabel');
+    const dataDescLabel = document.getElementById('dataDescLabel');
+    const apiStatus = document.getElementById('apiStatus');
+
+    // UI Helpers
+    function updateStatusUI(source, time, desc, statusClass) {
+        dataSourceLabel.innerText = source;
+        lastUpdateLabel.innerText = time;
+        dataDescLabel.innerText = desc;
+        apiStatus.innerText = source === "Live API" ? "Live" : (source === "Cached Data" ? "Cached" : "Static");
+        apiStatus.className = `status-badge ${statusClass}`;
+    }
 
     // View Switching
     window.switchView = function(view, btn) {
@@ -710,30 +684,28 @@
 
     function init() {
         initTheme();
-        loadState(); 
         
-        // Re-inject static data into historyData every time to ensure accuracy
-        historyData = {
-            dates: sortedData.map(d => d.d),
-            icici: sortedData.map(d => d.ic),
-            nippon: sortedData.map(d => d.nip),
-            silver: sortedData.map(d => d.ag),
-            usd: sortedData.map(d => d.usd)
-        };
+        // 1. Initialize with Default/Static Data first
+        updateStatusUI("Default Data", "Static", "Verified historical data (Investing.com)", "static");
         
+        // 2. Try loading Cache
+        const loadedFromCache = loadState(); 
+        if(loadedFromCache) {
+             updateStatusUI("Cached Data", new Date().toLocaleTimeString(), "Restored from local storage", "cached");
+        }
+
         initChart();
         calculatePortfolio(); 
-        
-        document.getElementById('apiStatus').innerText = "Static";
     }
 
     function saveState() {
         const data = {
             iciciInv: iciciInv.value, iciciAvg: iciciAvg.value,
             nipponInv: nipponInv.value, nipponAvg: nipponAvg.value,
-            // We do NOT save inputs/history here to avoid overwriting trusted static data with potentially stale localstorage
-            // We ONLY save user portfolio values
-            premium: premiumRange.value
+            usd: usdInput.value, silver: silverInput.value,
+            premium: premiumRange.value,
+            history: historyData,
+            lastFetch: new Date().toISOString()
         };
         localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
     }
@@ -747,19 +719,21 @@
             if(data.nipponInv) nipponInv.value = data.nipponInv;
             if(data.nipponAvg) nipponAvg.value = data.nipponAvg;
             
-            const latest = staticData[0];
-            usdInput.value = latest.usd; 
-            document.getElementById('usdInrRange').value = latest.usd; 
-            
-            silverInput.value = latest.ag; 
-            document.getElementById('silverPriceRange').value = latest.ag; 
+            if(data.usd) { usdInput.value = data.usd; document.getElementById('usdInrRange').value = data.usd; }
+            if(data.silver) { silverInput.value = data.silver; document.getElementById('silverPriceRange').value = data.silver; }
             
             if(data.premium) { 
                 premiumRange.value = data.premium; 
                 globalPremiumPercent = parseFloat(data.premium);
                 premiumDisplay.innerText = data.premium + "%";
             }
+            // Restore saved history IF it has more data than default (basic check)
+            if(data.history && Array.isArray(data.history.dates) && data.history.dates.length >= defaultHistoryData.dates.length) {
+                historyData = data.history;
+                return true;
+            }
         }
+        return false;
     }
 
     window.syncInputs = function(src, dest) {
@@ -782,7 +756,6 @@
         const basePrice = (silver * OZ_TO_KG * usd) / KG_TO_GRAM;
         
         const currentIciciPrice = basePrice * (1 + (globalPremiumPercent/100));
-        // Maintaining slight spread
         const currentNipponPrice = currentIciciPrice * 0.99; 
 
         iciciPriceEl.innerText = "₹" + currentIciciPrice.toFixed(2);
@@ -820,7 +793,7 @@
         if(document.getElementById('tableWrapper').style.display !== 'none') {
             renderTable(); 
         }
-        saveState(); 
+        // Save handled by callers or specific saveState calls
     }
 
     function formatPnl(el, amount, base) {
@@ -830,7 +803,6 @@
         el.className = amount >= 0 ? 'pnl-positive' : 'pnl-negative';
     }
 
-    // --- CHART LOGIC ---
     function initChart() {
         chartInstance = new Chart(ctx, {
             type: 'line',
@@ -842,17 +814,8 @@
                 plugins: { legend: { display: true, position:'top' } },
                 scales: {
                     x: { grid: { display: false } },
-                    y: { 
-                        beginAtZero: false,
-                        title: { display: true, text: 'Price' }
-                    },
-                    y1: {
-                        type: 'linear',
-                        display: true,
-                        position: 'right',
-                        grid: { drawOnChartArea: false },
-                        title: { display: true, text: 'Total Value (₹)' }
-                    }
+                    y: { beginAtZero: false, title: { display: true, text: 'Price' } },
+                    y1: { type: 'linear', display: true, position: 'right', grid: { drawOnChartArea: false }, title: { display: true, text: 'Total Value (₹)' } }
                 }
             }
         });
@@ -1001,7 +964,6 @@
         calculatePortfolio(); 
     }
 
-    // ROBUST FETCH LOGIC FOR REFRESH
     async function fetchWithFallback(url) {
         const proxies = [
             u => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
@@ -1017,8 +979,8 @@
     }
 
     window.fetchMarketData = async function() {
-        const status = document.getElementById('apiStatus');
-        status.innerText = "Updating...";
+        const statusText = document.getElementById('apiStatus');
+        updateStatusUI("Updating...", "...", "Fetching latest market data...", "live");
         
         // 1. Fetch Live USD/INR
         try {
@@ -1031,7 +993,6 @@
         } catch(e) { console.warn("USD fetch failed"); }
 
         // 2. Fetch Live Silver (Yahoo via proxy)
-        // Since we can't reliably get ETF price, we calculate it dynamically
         const ts = Date.now();
         const silverUrl = `https://query1.finance.yahoo.com/v8/finance/chart/XAGUSD=X?interval=1m&range=1d&_=${ts}`;
         
@@ -1050,24 +1011,34 @@
                 
                 // Calc Estimated ETF Price
                 const estIcici = liveFairValue * (1 + livePrem);
-                const estNippon = estIcici * 0.99; // maintain ratio
+                const estNippon = estIcici * 0.99; 
                 
-                // Push to history arrays (in-memory)
-                historyData.dates.push(todayStr + " (Live)");
-                historyData.silver.push(liveSilver);
-                historyData.usd.push(liveUsd);
-                historyData.icici.push(estIcici);
-                historyData.nippon.push(estNippon);
+                // Only push if last point isn't today (simple check)
+                const lastDate = historyData.dates[historyData.dates.length-1];
+                if(lastDate !== todayStr && lastDate.indexOf("Live") === -1) {
+                    historyData.dates.push(todayStr + " (Live)");
+                    historyData.silver.push(liveSilver);
+                    historyData.usd.push(liveUsd);
+                    historyData.icici.push(estIcici);
+                    historyData.nippon.push(estNippon);
+                } else {
+                    // Update last point
+                    const idx = historyData.dates.length - 1;
+                    historyData.silver[idx] = liveSilver;
+                    historyData.usd[idx] = liveUsd;
+                    historyData.icici[idx] = estIcici;
+                    historyData.nippon[idx] = estNippon;
+                }
                 
-                status.innerText = "Live";
-                status.className = "status-badge live";
+                updateStatusUI("Live API", new Date().toLocaleTimeString(), "Yahoo Finance (Silver) & Frankfurter (USD)", "live");
             }
         } catch(e) {
             console.warn("Silver fetch failed", e);
-            status.innerText = "Est. Mode"; 
+            updateStatusUI("Cached/Static", new Date().toLocaleTimeString(), "Live fetch failed. Using stored data.", "error"); 
         }
         
-        calculatePortfolio();
+        calculatePortfolio(); 
+        saveState();
     }
 
     init();
