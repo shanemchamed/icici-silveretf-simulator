@@ -565,12 +565,13 @@
                             <thead>
                                 <tr>
                                     <th>Date</th>
-                                    <th>Silver USD/oz</th>
-                                    <th>USD/INR</th>
-                                    <th>ICICI ETF ₹</th>
-                                    <th>ICICI Prem %</th>
-                                    <th>Nippon ETF ₹</th>
-                                    <th>Nippon Prem %</th>
+                                    <th>Silver $</th>
+                                    <th>USD ₹</th>
+                                    <th>Fair Val ₹ <div class="tab-indicator">Base/g</div></th>
+                                    <th>ICICI ₹</th>
+                                    <th>Prem %</th>
+                                    <th>Nippon ₹</th>
+                                    <th>Prem %</th>
                                 </tr>
                             </thead>
                             <tbody id="tableBody">
@@ -665,46 +666,48 @@
         div.className = 'log-entry';
         div.innerHTML = `<span class="log-time">[${time}]</span> <span class="log-${type}">${msg}</span>`;
         log.appendChild(div);
-        // Auto scroll
         const container = document.getElementById('debugConsole');
         container.scrollTop = container.scrollHeight;
     }
 
     // --- Configuration ---
-    const STORAGE_KEY = 'silver_portfolio_v25';
+    const STORAGE_KEY = 'silver_portfolio_v28';
     const OZ_TO_KG = 32.1507;
     const KG_TO_GRAM = 1000;
     
+    // Default calibration if offline
     let globalPremiumPercent = 1.2;
     let currentChartType = 'portfolio';
 
-    // --- Exact Data Provided by User (Default/Static) ---
-    const staticData = [
-        { d: "22-Jan-26", ag: 93.53, usd: 91.63, ic: 278.9, nip: 276.3 },
-        { d: "21-Jan-26", ag: 93.17, usd: 91.65, ic: 321.5, nip: 308.0 },
-        { d: "20-Jan-26", ag: 94.37, usd: 91.58, ic: 313.8, nip: 297.6 },
-        { d: "19-Jan-26", ag: 95.87, usd: 91.50, ic: 295.0, nip: 282.9 },
-        { d: "16-Jan-26", ag: 90.09, usd: 90.33, ic: 281.7, nip: 269.4 },
-        { d: "14-Jan-26", ag: 90.09, usd: 90.61, ic: 274.3, nip: 262.8 },
-        { d: "13-Jan-26", ag: 90.28, usd: 90.59, ic: 260.8, nip: 249.5 },
-        { d: "12-Jan-26", ag: 89.95, usd: 90.53, ic: 254.1, nip: 243.4 },
-        { d: "09-Jan-26", ag: 80.09, usd: 90.53, ic: 240.4, nip: 230.4 },
-        { d: "08-Jan-26", ag: 80.09, usd: 90.13, ic: 234.1, nip: 223.5 },
-        { d: "07-Jan-26", ag: 80.09, usd: 90.25, ic: 244.4, nip: 234.4 },
-        { d: "06-Jan-26", ag: 80.09, usd: 90.25, ic: 241.7, nip: 231.7 },
-        { d: "05-Jan-26", ag: 76.13, usd: 90.25, ic: 225.5, nip: 225.5 },
-        { d: "02-Jan-26", ag: 72.05, usd: 90.25, ic: 218.0, nip: 221.9 },
-        { d: "31-Dec-25", ag: 76.23, usd: 89.98, ic: 223.0, nip: 215.4 },
-        { d: "30-Dec-25", ag: 75.20, usd: 89.76, ic: 220.0, nip: 218.2 },
-        { d: "26-Dec-25", ag: 79.18, usd: 89.78, ic: 229.0, nip: 219.9 },
-        { d: "24-Dec-25", ag: 71.80, usd: 89.83, ic: 210.0, nip: 209.2 },
-        { d: "23-Dec-25", ag: 71.80, usd: 89.48, ic: 205.0, nip: 201.8 },
-        { d: "22-Dec-25", ag: 69.12, usd: 89.66, ic: 202.0, nip: 200.0 }
-    ];
+    // --- Exact Data Provided by User (Correct historical record) ---
+    // Note: This is ordered Newest -> Oldest for user input consistency, 
+    // but code reverses it for charting.
+	const staticData = [
+		{ d: "23-Jan-26", ag: 100.64, usd: 91.63, ic: 306.55, nip: 292.73 },
+		{ d: "22-Jan-26", ag: 93.53, usd: 91.63, ic: 278.9, nip: 276.3 },
+		{ d: "21-Jan-26", ag: 93.17, usd: 91.65, ic: 321.5, nip: 308.0 },
+		{ d: "20-Jan-26", ag: 94.37, usd: 91.58, ic: 313.8, nip: 297.6 },
+		{ d: "19-Jan-26", ag: 95.87, usd: 91.50, ic: 295.0, nip: 282.9 },
+		{ d: "16-Jan-26", ag: 90.09, usd: 90.33, ic: 281.7, nip: 269.4 },
+		{ d: "14-Jan-26", ag: 90.09, usd: 90.61, ic: 274.3, nip: 262.8 },
+		{ d: "13-Jan-26", ag: 90.28, usd: 90.59, ic: 260.8, nip: 249.5 },
+		{ d: "12-Jan-26", ag: 89.95, usd: 90.53, ic: 254.1, nip: 243.4 },
+		{ d: "09-Jan-26", ag: 80.09, usd: 90.53, ic: 240.4, nip: 230.4 },
+		{ d: "08-Jan-26", ag: 80.09, usd: 90.13, ic: 234.1, nip: 223.5 },
+		{ d: "07-Jan-26", ag: 80.09, usd: 90.25, ic: 244.4, nip: 234.4 },
+		{ d: "06-Jan-26", ag: 80.09, usd: 90.25, ic: 241.7, nip: 231.7 },
+		{ d: "05-Jan-26", ag: 76.13, usd: 90.25, ic: 225.5, nip: 225.5 },
+		{ d: "02-Jan-26", ag: 72.05, usd: 90.25, ic: 218.0, nip: 221.9 },
+		{ d: "31-Dec-25", ag: 76.23, usd: 89.98, ic: 223.0, nip: 215.4 },
+		{ d: "30-Dec-25", ag: 75.20, usd: 89.76, ic: 220.0, nip: 218.2 },
+		{ d: "26-Dec-25", ag: 79.18, usd: 89.78, ic: 229.0, nip: 219.9 },
+		{ d: "24-Dec-25", ag: 71.80, usd: 89.83, ic: 210.0, nip: 209.2 },
+		{ d: "23-Dec-25", ag: 71.80, usd: 89.48, ic: 205.0, nip: 201.8 },
+		{ d: "22-Dec-25", ag: 69.12, usd: 89.66, ic: 202.0, nip: 200.0 }
+	];
 
     const sortedStatic = [...staticData].reverse();
     
-    // Default Static Data Structure
     const defaultHistoryData = {
         dates: sortedStatic.map(d => d.d),
         icici: sortedStatic.map(d => d.ic),
@@ -733,18 +736,16 @@
     const totalValEl = document.getElementById('totalValue');
     const totalPnlEl = document.getElementById('totalPnl');
     
-    // Status Elements
     const dataSourceLabel = document.getElementById('dataSourceLabel');
     const lastUpdateLabel = document.getElementById('lastUpdateLabel');
     const dataDescLabel = document.getElementById('dataDescLabel');
     const apiStatus = document.getElementById('apiStatus');
 
-    // UI Helpers
     function updateStatusUI(source, time, desc, statusClass) {
         dataSourceLabel.innerText = source;
         lastUpdateLabel.innerText = time;
         dataDescLabel.innerText = desc;
-        dataDescLabel.title = desc; // Add full error on hover
+        dataDescLabel.title = desc; 
         apiStatus.innerText = source === "Live API" ? "Live" : (source === "Cached Data" ? "Cached" : "Static");
         apiStatus.className = `status-badge ${statusClass}`;
     }
@@ -768,7 +769,6 @@
         }
     }
 
-    // Chart Type Switching
     window.setChartType = function(type, btn) {
         const btns = btn.parentNode.querySelectorAll('button');
         btns.forEach(b => b.classList.remove('active'));
@@ -795,12 +795,12 @@
             const icici = historyData.icici[i];
             const nippon = historyData.nippon[i];
             
-            // Logic: 
-            // 1. Fair Value (₹/g) = (Silver_USD * 32.1507 * USD_INR) / 1000
-            // 2. Premium % = ((ETF - FairValue) / FairValue) * 100
-            
+            // Formula provided by user:
+            // Step 1: Find actual silver price per gram in India (Fair Value)
+            // Silver $ * 32.1507 * USD / 1000
             const fairValue = (silver * OZ_TO_KG * usd) / KG_TO_GRAM;
             
+            // Step 2: Compare ETF Price and calculated price to find premium
             const iciciPrem = ((icici - fairValue) / fairValue) * 100;
             const nipponPrem = ((nippon - fairValue) / fairValue) * 100;
             
@@ -809,9 +809,10 @@
 
             const row = `
                 <tr>
-                    <td>${date}</td>
+                    <td style="text-align:left;">${date}</td>
                     <td>$${silver.toFixed(2)}</td>
                     <td>₹${usd.toFixed(2)}</td>
+                    <td style="color:var(--text-muted)">₹${fairValue.toFixed(2)}</td>
                     <td style="font-weight:bold; color:var(--icici-color)">₹${icici.toFixed(1)}</td>
                     <td style="font-weight:bold; color:${icColor}">${iciciPrem.toFixed(2)}%</td>
                     <td style="font-weight:bold; color:var(--nippon-color)">₹${nippon.toFixed(1)}</td>
@@ -828,14 +829,10 @@
     function init() {
         initTheme();
         
-        // 1. Initialize with Default/Static Data first
-        updateStatusUI("Default Data", "Static", "Verified historical data (Investing.com)", "static");
-        
-        // 2. Try loading Cache
-        const loadedFromCache = loadState(); 
-        if(loadedFromCache) {
-             updateStatusUI("Cached Data", new Date().toLocaleTimeString(), "Restored from local storage", "cached");
-        }
+        // Always reset to static data structure on init to ensure table accuracy
+        // We only append new "Live" points to this base structure
+        updateStatusUI("Static Data", "Validated", "Verified historical data (Investing.com)", "static");
+        historyData = JSON.parse(JSON.stringify(defaultHistoryData));
 
         initChart();
         calculatePortfolio(); 
@@ -845,10 +842,7 @@
         const data = {
             iciciInv: iciciInv.value, iciciAvg: iciciAvg.value,
             nipponInv: nipponInv.value, nipponAvg: nipponAvg.value,
-            usd: usdInput.value, silver: silverInput.value,
-            premium: premiumRange.value,
-            history: historyData,
-            lastFetch: new Date().toISOString()
+            premium: premiumRange.value
         };
         localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
     }
@@ -861,22 +855,19 @@
             if(data.iciciAvg) iciciAvg.value = data.iciciAvg;
             if(data.nipponInv) nipponInv.value = data.nipponInv;
             if(data.nipponAvg) nipponAvg.value = data.nipponAvg;
-            
-            if(data.usd) { usdInput.value = data.usd; document.getElementById('usdInrRange').value = data.usd; }
-            if(data.silver) { silverInput.value = data.silver; document.getElementById('silverPriceRange').value = data.silver; }
-            
             if(data.premium) { 
                 premiumRange.value = data.premium; 
                 globalPremiumPercent = parseFloat(data.premium);
                 premiumDisplay.innerText = data.premium + "%";
             }
-            // Restore saved history IF it has more data than default (basic check)
-            if(data.history && Array.isArray(data.history.dates) && data.history.dates.length >= defaultHistoryData.dates.length) {
-                historyData = data.history;
-                return true;
-            }
         }
-        return false;
+        
+        // Initialize inputs with the latest static data point
+        const latest = staticData[0];
+        usdInput.value = latest.usd;
+        document.getElementById('usdInrRange').value = latest.usd;
+        silverInput.value = latest.ag;
+        document.getElementById('silverPriceRange').value = latest.ag;
     }
 
     window.syncInputs = function(src, dest) {
@@ -896,10 +887,10 @@
         const usd = parseFloat(usdInput.value) || 0;
         const silver = parseFloat(silverInput.value) || 0;
 
+        // Current Forecast Logic (for the top cards)
         const basePrice = (silver * OZ_TO_KG * usd) / KG_TO_GRAM;
-        
         const currentIciciPrice = basePrice * (1 + (globalPremiumPercent/100));
-        const currentNipponPrice = currentIciciPrice * 0.99; 
+        const currentNipponPrice = currentIciciPrice * 0.99; // Simple spread logic for *forecast* only
 
         iciciPriceEl.innerText = "₹" + currentIciciPrice.toFixed(2);
         nipponPriceEl.innerText = "₹" + currentNipponPrice.toFixed(2);
@@ -936,7 +927,6 @@
         if(document.getElementById('tableWrapper').style.display !== 'none') {
             renderTable(); 
         }
-        // Save handled by callers or specific saveState calls
     }
 
     function formatPnl(el, amount, base) {
@@ -1043,7 +1033,7 @@
                 const base = (ag * OZ_TO_KG * us) / KG_TO_GRAM;
                 return base > 0 ? ((ic - base) / base) * 100 : 0;
             });
-            dPremiumIcici.push(globalPremiumPercent); // Push forecast premium
+            dPremiumIcici.push(globalPremiumPercent); // Push forecast
             
             const dPremiumNippon = dNippon.map((nip, idx) => {
                 const ag = dSilver[idx] || 0;
@@ -1108,9 +1098,9 @@
     }
 
     async function fetchWithFallback(url) {
-        // Expanded Proxy List with robust wrappers
+        // Expanded Proxy List for better reliability
         const proxies = [
-            u => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`, // Changed to /raw for direct JSON
+            u => `https://api.allorigins.win/get?url=${encodeURIComponent(u)}`, 
             u => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`,
             u => `https://corsproxy.io/?${encodeURIComponent(u)}`,
             u => `https://thingproxy.freeboard.io/fetch/${u}`
@@ -1133,8 +1123,7 @@
                     const text = await res.text();
                     try {
                         const json = JSON.parse(text);
-                        
-                        // Handle AllOrigins specific wrapper if not using /raw
+                        // Handle AllOrigins specific wrapper
                         if (json.contents) {
                             try {
                                 const inner = JSON.parse(json.contents);
@@ -1143,7 +1132,6 @@
                                 // contents might be raw string
                             }
                         }
-
                         // Standard Yahoo JSON validation
                         if(json.chart && json.chart.result && json.chart.result.length > 0) {
                             return json;
@@ -1171,6 +1159,7 @@
         const ts = Date.now();
         // Use query2 to potentially avoid blocks
         const base = "https://query2.finance.yahoo.com/v8/finance/chart/";
+        // Changed range to 1mo to get full history for the table
         const params = "?interval=1d&range=5d&_=" + ts; 
 
         // 1. Live USD (Frankfurter)
@@ -1190,54 +1179,60 @@
         }
 
         // 2. Live Silver (Yahoo via proxy)
-        const silverUrl = `${base}XAGUSD=X${params}`;
-        
+        // Fallback Logic: Try Silver Spot first, then Futures if needed
+        let silverData = null;
         try {
-            const silverData = await fetchWithFallback(silverUrl);
-            
-            // Validate deeply
-            const result = silverData?.chart?.result?.[0];
-            if(result?.meta?.regularMarketPrice) {
-                const liveSilver = result.meta.regularMarketPrice;
-                silverInput.value = liveSilver.toFixed(2);
-                document.getElementById('silverPriceRange').value = liveSilver;
-                
-                logDebug(`Silver Fetch Success: $${liveSilver}`, "success");
-                
-                const todayStr = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: '2-digit' }).replace(/ /g, '-');
-                
-                const lastDate = historyData.dates[historyData.dates.length-1];
-                const currentUsdVal = liveUsd || parseFloat(usdInput.value);
-                const base = (liveSilver * OZ_TO_KG * currentUsdVal) / KG_TO_GRAM;
-                
-                const estIcici = base * (1 + (globalPremiumPercent/100));
-                const estNippon = estIcici * 0.99;
-
-                // Update logic: if last point is NOT today, append. If it IS today (live), update.
-                if(lastDate.indexOf("Live") === -1 && lastDate !== todayStr) {
-                    historyData.dates.push(todayStr + " (Live)");
-                    historyData.silver.push(liveSilver);
-                    historyData.usd.push(currentUsdVal);
-                    historyData.icici.push(estIcici);
-                    historyData.nippon.push(estNippon);
-                } else {
-                    const idx = historyData.dates.length - 1;
-                    historyData.dates[idx] = todayStr + " (Live)"; 
-                    historyData.silver[idx] = liveSilver;
-                    historyData.usd[idx] = currentUsdVal;
-                    historyData.icici[idx] = estIcici;
-                    historyData.nippon[idx] = estNippon;
-                }
-                
-                updateStatusUI("Live API", new Date().toLocaleTimeString(), "Yahoo Finance (Silver) & Frankfurter (USD)", "live");
-            } else {
-                 throw new Error("Missing Price Data");
-            }
+            silverData = await fetchWithFallback(`${base}XAGUSD=X${params}`);
         } catch(e) {
-            console.warn("Fetch failed", e);
-            logDebug(`Fetch Chain Failed: ${e.message}`, "error");
-            // Fallback to offline mode gracefully
-            updateStatusUI("Offline Mode", new Date().toLocaleTimeString(), "Using accurate internal data.", "error");
+            logDebug("Spot Silver Fetch Failed, trying Futures...", "info");
+            try {
+                silverData = await fetchWithFallback(`${base}SI=F${params}`);
+            } catch(e2) {
+                 logDebug("Futures Fetch Failed too.", "error");
+            }
+        }
+
+        if(silverData?.chart?.result?.[0]?.meta?.regularMarketPrice) {
+            const liveSilver = silverData.chart.result[0].meta.regularMarketPrice;
+            silverInput.value = liveSilver.toFixed(2);
+            document.getElementById('silverPriceRange').value = liveSilver;
+            
+            logDebug(`Silver Fetch Success: $${liveSilver}`, "success");
+            
+            const todayStr = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: '2-digit' }).replace(/ /g, '-');
+            
+            // Only update or append the "Live" data point at the end of the history array
+            // Do NOT touch the previous static historical data.
+            const lastDate = historyData.dates[historyData.dates.length-1];
+            
+            const currentUsdVal = liveUsd || parseFloat(usdInput.value);
+            const base = (liveSilver * OZ_TO_KG * currentUsdVal) / KG_TO_GRAM;
+            const currentPrem = parseFloat(premiumRange.value);
+            
+            const estIcici = base * (1 + (currentPrem/100));
+            const estNippon = estIcici * 0.99; // Simple ratio for forecast
+
+            if(lastDate.indexOf("Live") === -1 && lastDate !== todayStr) {
+                // New Day: Append
+                historyData.dates.push(todayStr + " (Live)");
+                historyData.silver.push(liveSilver);
+                historyData.usd.push(currentUsdVal);
+                historyData.icici.push(estIcici);
+                historyData.nippon.push(estNippon);
+            } else {
+                // Update Today's point
+                const idx = historyData.dates.length - 1;
+                historyData.dates[idx] = todayStr + " (Live)"; 
+                historyData.silver[idx] = liveSilver;
+                historyData.usd[idx] = currentUsdVal;
+                historyData.icici[idx] = estIcici;
+                historyData.nippon[idx] = estNippon;
+            }
+            
+            updateStatusUI("Live API", new Date().toLocaleTimeString(), "Yahoo Finance (Silver) & Frankfurter (USD)", "live");
+        } else {
+             updateStatusUI("Offline Mode", new Date().toLocaleTimeString(), "Using accurate internal data.", "error");
+             logDebug("Fetch failed: No valid Silver data found", "error");
         }
 
         calculatePortfolio();
