@@ -498,18 +498,6 @@
                     <input type="range" id="silverPriceRange" min="0" max="150" step="0.1" value="93.53" oninput="syncInputs('silverPriceRange', 'silverPrice')">
                 </div>
                 
-                <!-- Premium Adjustment -->
-                <div class="input-group" style="padding-top: 10px; border-top: 1px dashed var(--border-color);">
-                    <label>
-                        Duty & Premium (%)
-                        <span id="premiumDisplay" style="color:var(--premium-color)">1.2%</span>
-                    </label>
-                    <input type="range" id="premiumRange" min="-20" max="30" step="0.1" value="1.2" oninput="updatePremium()">
-                    <div style="font-size:0.75rem; color:var(--text-muted); margin-top:4px;">
-                        *Baseline premium for projection
-                    </div>
-                </div>
-
                 <!-- Updated Upload/Import Section -->
                 <div class="upload-area">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
@@ -553,6 +541,16 @@
                     <div class="price-display" id="iciciPrice" style="color: var(--icici-color)">₹278.90</div>
                     <div class="sub-text">Current Unit Price</div>
                 </div>
+                
+                <!-- Added Premium Slider -->
+                <div class="input-group" style="padding-bottom:10px; margin-bottom:15px; border-bottom:1px dashed var(--border-color)">
+                    <label>Premium (%)</label>
+                    <div style="display:flex; gap:10px; align-items:center;">
+                        <input type="range" id="iciciPremiumRange" min="-5" max="10" step="0.1" value="1.2" oninput="syncInputs('iciciPremiumRange', 'iciciPremiumInput'); calculatePortfolio();">
+                        <input type="number" id="iciciPremiumInput" value="1.2" step="0.1" style="width:70px;" oninput="syncInputs('iciciPremiumInput', 'iciciPremiumRange'); calculatePortfolio();">
+                    </div>
+                </div>
+
                 <div class="input-group">
                     <label>Invested (₹)</label>
                     <input type="number" id="iciciInvested" placeholder="0" oninput="onInvestedInput('icici')">
@@ -579,6 +577,16 @@
                     <div class="price-display" id="nipponPrice" style="color: var(--nippon-color)">₹276.30</div>
                     <div class="sub-text">Current Unit Price</div>
                 </div>
+
+                <!-- Added Premium Slider -->
+                <div class="input-group" style="padding-bottom:10px; margin-bottom:15px; border-bottom:1px dashed var(--border-color)">
+                    <label>Premium (%)</label>
+                    <div style="display:flex; gap:10px; align-items:center;">
+                        <input type="range" id="nipponPremiumRange" min="-5" max="10" step="0.1" value="0.2" oninput="syncInputs('nipponPremiumRange', 'nipponPremiumInput'); calculatePortfolio();">
+                        <input type="number" id="nipponPremiumInput" value="0.2" step="0.1" style="width:70px;" oninput="syncInputs('nipponPremiumInput', 'nipponPremiumRange'); calculatePortfolio();">
+                    </div>
+                </div>
+
                 <div class="input-group">
                     <label>Invested (₹)</label>
                     <input type="number" id="nipponInvested" placeholder="0" oninput="onInvestedInput('nippon')">
@@ -762,13 +770,12 @@
     }
 
     // --- Configuration ---
-    const STORAGE_KEY = 'silver_portfolio_v30'; 
+    const STORAGE_KEY = 'silver_portfolio_v31'; 
     const DATA_STORAGE_KEY = 'silver_history_data';
     const OZ_TO_KG = 32.1507;
     const KG_TO_GRAM = 1000;
     
     // Default calibration if offline
-    let globalPremiumPercent = 1.2;
     let currentChartType = 'portfolio';
 
     // --- Exact Data Provided by User (Default Historical Record) ---
@@ -805,8 +812,12 @@
     // --- Elements ---
     const usdInput = document.getElementById('usdInr');
     const silverInput = document.getElementById('silverPrice');
-    const premiumRange = document.getElementById('premiumRange');
-    const premiumDisplay = document.getElementById('premiumDisplay');
+    
+    // Independent Premium Elements
+    const iciciPremiumRange = document.getElementById('iciciPremiumRange');
+    const iciciPremiumInput = document.getElementById('iciciPremiumInput');
+    const nipponPremiumRange = document.getElementById('nipponPremiumRange');
+    const nipponPremiumInput = document.getElementById('nipponPremiumInput');
     
     const iciciInv = document.getElementById('iciciInvested');
     const iciciAvg = document.getElementById('iciciAvg');
@@ -958,8 +969,8 @@
             const nippon = historyData.nippon[i];
             
             const fairValue = (silver * OZ_TO_KG * usd) / KG_TO_GRAM;
-            const iciciPrem = ((icici - fairValue) / fairValue) * 100;
-            const nipponPrem = ((nippon - fairValue) / fairValue) * 100;
+            const iciciPrem = fairValue > 0 ? ((icici - fairValue) / fairValue) * 100 : 0;
+            const nipponPrem = fairValue > 0 ? ((nippon - fairValue) / fairValue) * 100 : 0;
             
             const icColor = iciciPrem >= 0 ? 'var(--total-color)' : '#e74c3c';
             const niColor = nipponPrem >= 0 ? 'var(--total-color)' : '#e74c3c';
@@ -1012,7 +1023,8 @@
         const data = {
             iciciInv: iciciInv.value, iciciAvg: iciciAvg.value,
             nipponInv: nipponInv.value, nipponAvg: nipponAvg.value,
-            premium: premiumRange.value,
+            iciciPremium: iciciPremiumInput.value,
+            nipponPremium: nipponPremiumInput.value,
             usd: usdInput.value,
             silver: silverInput.value
         };
@@ -1042,10 +1054,13 @@
                 document.getElementById('nipponUnits').value = (data.nipponInv / data.nipponAvg).toFixed(3);
             }
             
-            if(data.premium) { 
-                premiumRange.value = data.premium; 
-                globalPremiumPercent = parseFloat(data.premium);
-                premiumDisplay.innerText = data.premium + "%";
+            if(data.iciciPremium) {
+                iciciPremiumInput.value = data.iciciPremium;
+                iciciPremiumRange.value = data.iciciPremium;
+            }
+            if(data.nipponPremium) {
+                nipponPremiumInput.value = data.nipponPremium;
+                nipponPremiumRange.value = data.nipponPremium;
             }
             
             // Overwrite with user saved values if they exist
@@ -1067,12 +1082,8 @@
         calculatePortfolio();
     }
     
-    window.updatePremium = function() {
-        globalPremiumPercent = parseFloat(premiumRange.value);
-        premiumDisplay.innerText = globalPremiumPercent.toFixed(1) + "%";
-        saveState();
-        calculatePortfolio();
-    }
+    // Deprecated old updatePremium, logic moved to independent inputs
+    // window.updatePremium = function() { ... } 
 
     // --- Dynamic Sync Input Handlers ---
     window.onInvestedInput = function(ticker) {
@@ -1115,10 +1126,14 @@
         const usd = parseFloat(usdInput.value) || 0;
         const silver = parseFloat(silverInput.value) || 0;
 
-        // Current Forecast Logic
+        // Independent Premium Logic
+        const iciciPremPct = parseFloat(iciciPremiumInput.value) || 0;
+        const nipponPremPct = parseFloat(nipponPremiumInput.value) || 0;
+
         const basePrice = (silver * OZ_TO_KG * usd) / KG_TO_GRAM;
-        const currentIciciPrice = basePrice * (1 + (globalPremiumPercent/100));
-        const currentNipponPrice = currentIciciPrice * 0.99; 
+        
+        const currentIciciPrice = basePrice * (1 + (iciciPremPct/100));
+        const currentNipponPrice = basePrice * (1 + (nipponPremPct/100));
 
         iciciPriceEl.innerText = "₹" + currentIciciPrice.toFixed(2);
         nipponPriceEl.innerText = "₹" + currentNipponPrice.toFixed(2);
@@ -1317,7 +1332,7 @@
                 const base = (ag * OZ_TO_KG * us) / KG_TO_GRAM;
                 return base > 0 ? ((ic - base) / base) * 100 : 0;
             });
-            dPremiumIcici.push(globalPremiumPercent);
+            dPremiumIcici.push(parseFloat(iciciPremiumInput.value) || 0);
             
             const dPremiumNippon = dNippon.map((nip, idx) => {
                 const ag = dSilver[idx] || 0;
@@ -1325,7 +1340,7 @@
                 const base = (ag * OZ_TO_KG * us) / KG_TO_GRAM;
                 return base > 0 ? ((nip - base) / base) * 100 : 0;
             });
-            dPremiumNippon.push(globalPremiumPercent);
+            dPremiumNippon.push(parseFloat(nipponPremiumInput.value) || 0);
 
             labels.push('Forecast');
 
@@ -1483,10 +1498,9 @@
             const lastDate = historyData.dates[historyData.dates.length-1];
             const currentUsdVal = liveUsd || parseFloat(usdInput.value);
             const base = (liveSilver * OZ_TO_KG * currentUsdVal) / KG_TO_GRAM;
-            const currentPrem = parseFloat(premiumRange.value);
             
-            const estIcici = base * (1 + (currentPrem/100));
-            const estNippon = estIcici * 0.99;
+            const estIcici = base * (1 + (parseFloat(iciciPremiumInput.value)/100));
+            const estNippon = base * (1 + (parseFloat(nipponPremiumInput.value)/100));
 
             if(lastDate.indexOf("Live") === -1 && lastDate !== todayStr) {
                 historyData.dates.push(todayStr + " (Live)");
