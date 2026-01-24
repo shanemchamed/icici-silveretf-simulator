@@ -176,8 +176,8 @@
         .card.total-summary .sub-text {
             color: rgba(255,255,255,0.8);
         }
-        .card.total-summary .price-display,
-        .card.total-summary .pnl-positive,
+        .card.total-summary .price-display, 
+        .card.total-summary .pnl-positive, 
         .card.total-summary .pnl-negative {
             color: white !important;
         }
@@ -229,6 +229,46 @@
         }
         input[type="range"]::-webkit-slider-thumb:hover {
             transform: scale(1.2);
+        }
+
+        /* Upload Button Styles */
+        .upload-area {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px dashed var(--border-color);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .btn-upload {
+            display: inline-block;
+            background: var(--highlight-bg);
+            border: 1px solid var(--nippon-color);
+            color: var(--nippon-color);
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            text-align: center;
+            font-weight: 600;
+            transition: var(--transition);
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .btn-upload:hover {
+            background: var(--nippon-color);
+            color: white;
+        }
+        .btn-reset {
+            background: transparent;
+            border: 1px solid var(--icici-color);
+            color: var(--icici-color);
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            margin-top: 5px;
         }
 
         /* Typography */
@@ -325,6 +365,7 @@
         .status-badge.live { background: rgba(16, 185, 129, 0.15); color: var(--total-color); }
         .status-badge.cached { background: rgba(234, 179, 8, 0.15); color: #d97706; }
         .status-badge.static { background: rgba(59, 130, 246, 0.15); color: #2563eb; }
+        .status-badge.uploaded { background: rgba(142, 68, 173, 0.15); color: #8e44ad; }
         .status-badge.error { background: rgba(231, 76, 60, 0.15); color: var(--icici-color); }
 
         /* Data Table Styles */
@@ -463,8 +504,39 @@
                     </div>
                 </div>
 
-                <div style="text-align: right; margin-top:10px;">
-                    <button onclick="fetchMarketData()" style="background:none; border:none; color:var(--nippon-color); text-decoration:underline; cursor:pointer; font-size:0.8rem;">Refresh Data</button>
+                <!-- Updated Upload/Import Section -->
+                <div class="upload-area">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                        <span style="font-size:0.8rem; font-weight:600; color:var(--text-muted)">Update History:</span>
+                        <button onclick="fetchMarketData()" style="background:none; border:none; color:var(--nippon-color); text-decoration:underline; cursor:pointer; font-size:0.8rem;">Refresh API</button>
+                    </div>
+                    
+                    <!-- Trigger to show import options -->
+                    <button class="btn-upload" onclick="toggleImportSection()">
+                        📁 Import / Paste Data
+                    </button>
+
+                    <!-- Hidden Import Section -->
+                    <div id="importSection" style="display:none; margin-top:10px;">
+                        <textarea id="jsonPasteArea" rows="5" placeholder='Paste JSON here: [{"d":"...", ...}]' style="width:100%; font-size:0.8rem; margin-bottom:8px; border-radius:8px; padding:8px; border:1px solid var(--input-border); background:var(--input-bg); color:var(--text-main); font-family:monospace; resize:vertical; box-sizing:border-box;"></textarea>
+                        
+                        <div style="display:flex; gap:8px;">
+                            <button class="btn-upload" onclick="handleTextUpload()" style="flex:1; background:var(--nippon-color); color:white;">
+                                Load Text
+                            </button>
+                            <label class="btn-upload" style="flex:1; text-align:center; display:flex; align-items:center; justify-content:center; cursor:pointer;">
+                                Upload File
+                                <input type="file" id="jsonUpload" accept=".json" style="display:none" onchange="handleFileUpload(this)">
+                            </label>
+                        </div>
+                        <div style="text-align:center; margin-top:5px;">
+                            <button class="btn-reset" onclick="toggleImportSection()">Cancel</button>
+                        </div>
+                    </div>
+
+                    <button id="resetDataBtn" class="btn-reset" onclick="resetToStatic()" style="display:none; width:100%; margin-top:10px;">
+                        ↺ Reset to Default Data
+                    </button>
                 </div>
             </div>
 
@@ -477,11 +549,11 @@
                 </div>
                 <div class="input-group">
                     <label>Invested (₹)</label>
-                    <input type="number" id="iciciInvested" placeholder="0" oninput="calculatePortfolio()">
+                    <input type="number" id="iciciInvested" placeholder="0" oninput="calculatePortfolioAndSave()">
                 </div>
                 <div class="input-group">
                     <label>Avg Buy Price (₹)</label>
-                    <input type="number" id="iciciAvg" placeholder="0" step="0.01" oninput="calculatePortfolio()">
+                    <input type="number" id="iciciAvg" placeholder="0" step="0.01" oninput="calculatePortfolioAndSave()">
                 </div>
                 <div style="display:flex; justify-content:space-between; margin-top:15px; padding-top:10px; border-top:1px solid var(--border-color);">
                     <span class="sub-text">Profit/Loss</span>
@@ -498,11 +570,11 @@
                 </div>
                 <div class="input-group">
                     <label>Invested (₹)</label>
-                    <input type="number" id="nipponInvested" placeholder="0" oninput="calculatePortfolio()">
+                    <input type="number" id="nipponInvested" placeholder="0" oninput="calculatePortfolioAndSave()">
                 </div>
                 <div class="input-group">
                     <label>Avg Buy Price (₹)</label>
-                    <input type="number" id="nipponAvg" placeholder="0" step="0.01" oninput="calculatePortfolio()">
+                    <input type="number" id="nipponAvg" placeholder="0" step="0.01" oninput="calculatePortfolioAndSave()">
                 </div>
                 <div style="display:flex; justify-content:space-between; margin-top:15px; padding-top:10px; border-top:1px solid var(--border-color);">
                     <span class="sub-text">Profit/Loss</span>
@@ -671,7 +743,8 @@
     }
 
     // --- Configuration ---
-    const STORAGE_KEY = 'silver_portfolio_v28';
+    const STORAGE_KEY = 'silver_portfolio_v29'; // Updated version key
+    const DATA_STORAGE_KEY = 'silver_history_data';
     const OZ_TO_KG = 32.1507;
     const KG_TO_GRAM = 1000;
     
@@ -679,10 +752,9 @@
     let globalPremiumPercent = 1.2;
     let currentChartType = 'portfolio';
 
-    // --- Exact Data Provided by User (Correct historical record) ---
-    // Note: This is ordered Newest -> Oldest for user input consistency, 
-    // but code reverses it for charting.
-	const staticData = [
+    // --- Exact Data Provided by User (Default Historical Record) ---
+    // Changed to 'let' to allow overwriting via Upload
+	let staticData = [
 		{ d: "23-Jan-26", ag: 100.64, usd: 91.63, ic: 306.55, nip: 292.73 },
 		{ d: "22-Jan-26", ag: 93.53, usd: 91.63, ic: 278.9, nip: 276.3 },
 		{ d: "21-Jan-26", ag: 93.17, usd: 91.65, ic: 321.5, nip: 308.0 },
@@ -705,18 +777,12 @@
 		{ d: "23-Dec-25", ag: 71.80, usd: 89.48, ic: 205.0, nip: 201.8 },
 		{ d: "22-Dec-25", ag: 69.12, usd: 89.66, ic: 202.0, nip: 200.0 }
 	];
+    // Keep a copy of default for resetting
+    const defaultStaticData = JSON.parse(JSON.stringify(staticData));
 
-    const sortedStatic = [...staticData].reverse();
-    
-    const defaultHistoryData = {
-        dates: sortedStatic.map(d => d.d),
-        icici: sortedStatic.map(d => d.ic),
-        nippon: sortedStatic.map(d => d.nip),
-        silver: sortedStatic.map(d => d.ag),
-        usd: sortedStatic.map(d => d.usd)
-    };
-
-    let historyData = JSON.parse(JSON.stringify(defaultHistoryData));
+    let sortedStatic;
+    let defaultHistoryData;
+    let historyData;
 
     // --- Elements ---
     const usdInput = document.getElementById('usdInr');
@@ -740,17 +806,94 @@
     const lastUpdateLabel = document.getElementById('lastUpdateLabel');
     const dataDescLabel = document.getElementById('dataDescLabel');
     const apiStatus = document.getElementById('apiStatus');
+    const resetBtn = document.getElementById('resetDataBtn');
+
+    function prepareData() {
+        sortedStatic = [...staticData].reverse();
+        defaultHistoryData = {
+            dates: sortedStatic.map(d => d.d),
+            icici: sortedStatic.map(d => d.ic),
+            nippon: sortedStatic.map(d => d.nip),
+            silver: sortedStatic.map(d => d.ag),
+            usd: sortedStatic.map(d => d.usd)
+        };
+        historyData = JSON.parse(JSON.stringify(defaultHistoryData));
+    }
 
     function updateStatusUI(source, time, desc, statusClass) {
         dataSourceLabel.innerText = source;
         lastUpdateLabel.innerText = time;
         dataDescLabel.innerText = desc;
         dataDescLabel.title = desc; 
-        apiStatus.innerText = source === "Live API" ? "Live" : (source === "Cached Data" ? "Cached" : "Static");
+        
+        let label = "Static";
+        if(source === "Live API") label = "Live";
+        else if(source === "Uploaded Data") label = "File";
+        else if(source === "Cached Data") label = "Cached";
+
+        apiStatus.innerText = label;
         apiStatus.className = `status-badge ${statusClass}`;
     }
 
-    // View Switching
+    // --- File & Paste Upload Logic ---
+    window.toggleImportSection = function() {
+        const sec = document.getElementById('importSection');
+        sec.style.display = sec.style.display === 'none' ? 'block' : 'none';
+    }
+
+    function validateAndLoadJSON(json) {
+        if(Array.isArray(json) && json.length > 0 && json[0].d && json[0].ag) {
+            localStorage.setItem(DATA_STORAGE_KEY, JSON.stringify(json));
+            logDebug("Data loaded. Reloading...", "success");
+            location.reload();
+        } else {
+            alert("Invalid JSON format. Expected array of objects with 'd', 'ag', 'usd', 'ic', 'nip' keys.");
+        }
+    }
+
+    window.handleFileUpload = function(input) {
+        const file = input.files[0];
+        if(!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                validateAndLoadJSON(JSON.parse(e.target.result));
+            } catch(err) {
+                alert("Error parsing JSON file: " + err.message);
+            }
+        };
+        reader.readAsText(file);
+    }
+
+    window.handleTextUpload = function() {
+        const text = document.getElementById('jsonPasteArea').value;
+        if(!text) {
+            alert("Please paste JSON data first.");
+            return;
+        }
+        try {
+            // Try standard JSON first
+            validateAndLoadJSON(JSON.parse(text));
+        } catch(err) {
+            // Fallback: Try to parse as JavaScript Object (Relaxed JSON)
+            try {
+                const looseJson = new Function("return " + text)();
+                validateAndLoadJSON(looseJson);
+            } catch (e2) {
+                alert("Error parsing text. Ensure it is valid JSON or a JavaScript Array.\n\nDetails: " + err.message);
+            }
+        }
+    }
+
+    window.resetToStatic = function() {
+        if(confirm("Are you sure you want to delete uploaded data and reset to defaults?")) {
+            localStorage.removeItem(DATA_STORAGE_KEY);
+            location.reload();
+        }
+    }
+
+    // --- View Switching ---
     window.switchView = function(view, btn) {
         const btns = btn.parentNode.querySelectorAll('button');
         btns.forEach(b => b.classList.remove('active'));
@@ -795,12 +938,7 @@
             const icici = historyData.icici[i];
             const nippon = historyData.nippon[i];
             
-            // Formula provided by user:
-            // Step 1: Find actual silver price per gram in India (Fair Value)
-            // Silver $ * 32.1507 * USD / 1000
             const fairValue = (silver * OZ_TO_KG * usd) / KG_TO_GRAM;
-            
-            // Step 2: Compare ETF Price and calculated price to find premium
             const iciciPrem = ((icici - fairValue) / fairValue) * 100;
             const nipponPrem = ((nippon - fairValue) / fairValue) * 100;
             
@@ -829,58 +967,89 @@
     function init() {
         initTheme();
         
-        // Always reset to static data structure on init to ensure table accuracy
-        // We only append new "Live" points to this base structure
-        updateStatusUI("Static Data", "Validated", "Verified historical data (Investing.com)", "static");
-        historyData = JSON.parse(JSON.stringify(defaultHistoryData));
+        // 1. Check for Uploaded Data
+        const customData = localStorage.getItem(DATA_STORAGE_KEY);
+        if(customData) {
+            try {
+                staticData = JSON.parse(customData);
+                resetBtn.style.display = 'inline-block';
+                updateStatusUI("Uploaded Data", "From Local Storage", "Using your custom JSON file.", "uploaded");
+            } catch(e) {
+                console.error("Failed to load custom data", e);
+            }
+        } else {
+             // 2. Default Static
+            updateStatusUI("Static Data", "Validated", "Verified historical data (Investing.com)", "static");
+        }
 
+        prepareData();
+        loadState(); // Load saved user inputs
         initChart();
-        calculatePortfolio(); 
+        calculatePortfolioAndSave(); 
     }
 
+    // --- SAVE / LOAD STATE (Enhanced) ---
     function saveState() {
         const data = {
             iciciInv: iciciInv.value, iciciAvg: iciciAvg.value,
             nipponInv: nipponInv.value, nipponAvg: nipponAvg.value,
-            premium: premiumRange.value
+            premium: premiumRange.value,
+            usd: usdInput.value,
+            silver: silverInput.value
         };
         localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        // logDebug("Auto-saved state", "info");
     }
 
     function loadState() {
         const stored = localStorage.getItem(STORAGE_KEY);
+        
+        // Default latest values from static data
+        const latest = staticData[0];
+        let loadedUsd = latest.usd;
+        let loadedSilver = latest.ag;
+
         if(stored) {
             const data = JSON.parse(stored);
             if(data.iciciInv) iciciInv.value = data.iciciInv;
             if(data.iciciAvg) iciciAvg.value = data.iciciAvg;
             if(data.nipponInv) nipponInv.value = data.nipponInv;
             if(data.nipponAvg) nipponAvg.value = data.nipponAvg;
+            
             if(data.premium) { 
                 premiumRange.value = data.premium; 
                 globalPremiumPercent = parseFloat(data.premium);
                 premiumDisplay.innerText = data.premium + "%";
             }
+            
+            // Overwrite with user saved values if they exist
+            if(data.usd) loadedUsd = data.usd;
+            if(data.silver) loadedSilver = data.silver;
         }
         
-        // Initialize inputs with the latest static data point
-        const latest = staticData[0];
-        usdInput.value = latest.usd;
-        document.getElementById('usdInrRange').value = latest.usd;
-        silverInput.value = latest.ag;
-        document.getElementById('silverPriceRange').value = latest.ag;
+        // Apply values to inputs
+        usdInput.value = parseFloat(loadedUsd).toFixed(2);
+        document.getElementById('usdInrRange').value = loadedUsd;
+        
+        silverInput.value = parseFloat(loadedSilver).toFixed(2);
+        document.getElementById('silverPriceRange').value = loadedSilver;
+    }
+
+    // Combined function to calculate AND save state (for inputs)
+    window.calculatePortfolioAndSave = function() {
+        calculatePortfolio();
+        saveState();
     }
 
     window.syncInputs = function(src, dest) {
         document.getElementById(dest).value = document.getElementById(src).value;
-        saveState();
-        calculatePortfolio();
+        calculatePortfolioAndSave();
     }
     
     window.updatePremium = function() {
         globalPremiumPercent = parseFloat(premiumRange.value);
         premiumDisplay.innerText = globalPremiumPercent.toFixed(1) + "%";
-        saveState();
-        calculatePortfolio();
+        calculatePortfolioAndSave();
     }
 
     function calculatePortfolio() {
@@ -1092,10 +1261,6 @@
 
         chartInstance.update();
     }
-    
-    window.updateChartDisplay = function() {
-        calculatePortfolio(); 
-    }
 
     async function fetchWithFallback(url) {
         // Expanded Proxy List for better reliability
@@ -1171,6 +1336,7 @@
                 liveUsd = usdData.rates.INR;
                 usdInput.value = liveUsd.toFixed(2);
                 document.getElementById('usdInrRange').value = liveUsd;
+                saveState(); // SAVE NEW USD
                 logDebug(`USD Fetch Success: ₹${liveUsd}`, "success");
             }
         } catch(e) { 
@@ -1196,6 +1362,7 @@
             const liveSilver = silverData.chart.result[0].meta.regularMarketPrice;
             silverInput.value = liveSilver.toFixed(2);
             document.getElementById('silverPriceRange').value = liveSilver;
+            saveState(); // SAVE NEW SILVER
             
             logDebug(`Silver Fetch Success: $${liveSilver}`, "success");
             
@@ -1235,8 +1402,7 @@
              logDebug("Fetch failed: No valid Silver data found", "error");
         }
 
-        calculatePortfolio();
-        saveState();
+        calculatePortfolioAndSave();
     }
 
     init();
