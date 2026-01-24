@@ -17,15 +17,18 @@
             --input-border: #cbd5e1;
             --highlight-bg: #f8fafc;
             
-            /* Brand Colors */
-            --icici-color: #e74c3c;
-            --nippon-color: #2980b9;
+            /* Brand Colors - Bright & Distinct */
+            --icici-color: #ff5252; /* Bright Red-Orange */
+            --nippon-color: #2196f3; /* Bright Blue */
+            --total-line-color: #9c27b0; /* Purple for Total Graph */
             --total-color: #10b981;
             --premium-color: #8e44ad;
             --silver-color: #7f8c8d;
             --usd-color: #d35400;
             
+            /* Dynamic Backgrounds */
             --total-bg: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            --total-bg-loss: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
             --total-text: #ffffff;
             
             /* UI Elements */
@@ -46,14 +49,16 @@
             --input-border: #475569;
             --highlight-bg: #2d3b4e;
             
-            --icici-color: #ff6b6b;
-            --nippon-color: #4fa3d1;
+            --icici-color: #ff8a80;
+            --nippon-color: #64b5f6;
+            --total-line-color: #ce93d8;
             --total-color: #34d399;
             --premium-color: #a569bd;
             --silver-color: #95a5a6;
             --usd-color: #e67e22;
             
             --total-bg: linear-gradient(135deg, #059669 0%, #047857 100%);
+            --total-bg-loss: linear-gradient(135deg, #991b1b 0%, #7f1d1d 100%);
         }
 
         body {
@@ -168,6 +173,7 @@
             background: var(--total-bg);
             color: var(--total-text);
             border: none;
+            transition: background 0.5s ease; /* Smooth transition for color change */
         }
         .card.total-summary h2 {
             border-color: rgba(255,255,255,0.3);
@@ -549,11 +555,16 @@
                 </div>
                 <div class="input-group">
                     <label>Invested (₹)</label>
-                    <input type="number" id="iciciInvested" placeholder="0" oninput="calculatePortfolioAndSave()">
+                    <input type="number" id="iciciInvested" placeholder="0" oninput="onInvestedInput('icici')">
                 </div>
                 <div class="input-group">
                     <label>Avg Buy Price (₹)</label>
-                    <input type="number" id="iciciAvg" placeholder="0" step="0.01" oninput="calculatePortfolioAndSave()">
+                    <input type="number" id="iciciAvg" placeholder="0" step="0.01" oninput="onPriceInput('icici')">
+                </div>
+                <!-- Added Units Field -->
+                <div class="input-group">
+                    <label>Units (Shares)</label>
+                    <input type="number" id="iciciUnits" placeholder="0" step="0.001" oninput="onUnitsInput('icici')">
                 </div>
                 <div style="display:flex; justify-content:space-between; margin-top:15px; padding-top:10px; border-top:1px solid var(--border-color);">
                     <span class="sub-text">Profit/Loss</span>
@@ -570,11 +581,16 @@
                 </div>
                 <div class="input-group">
                     <label>Invested (₹)</label>
-                    <input type="number" id="nipponInvested" placeholder="0" oninput="calculatePortfolioAndSave()">
+                    <input type="number" id="nipponInvested" placeholder="0" oninput="onInvestedInput('nippon')">
                 </div>
                 <div class="input-group">
                     <label>Avg Buy Price (₹)</label>
-                    <input type="number" id="nipponAvg" placeholder="0" step="0.01" oninput="calculatePortfolioAndSave()">
+                    <input type="number" id="nipponAvg" placeholder="0" step="0.01" oninput="onPriceInput('nippon')">
+                </div>
+                <!-- Added Units Field -->
+                <div class="input-group">
+                    <label>Units (Shares)</label>
+                    <input type="number" id="nipponUnits" placeholder="0" step="0.001" oninput="onUnitsInput('nippon')">
                 </div>
                 <div style="display:flex; justify-content:space-between; margin-top:15px; padding-top:10px; border-top:1px solid var(--border-color);">
                     <span class="sub-text">Profit/Loss</span>
@@ -588,7 +604,7 @@
         <div class="right-col">
             
             <!-- Total Summary Card -->
-            <div class="card total-summary" style="margin-bottom: 24px;">
+            <div class="card total-summary" id="totalSummaryCard" style="margin-bottom: 24px;">
                 <h2>Total Portfolio Value</h2>
                 <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; text-align: center;">
                     <div>
@@ -661,8 +677,11 @@
                         <label class="custom-checkbox" style="color:var(--nippon-color); display:inline-flex; margin-right:10px;">
                             <input type="checkbox" id="showNippon" checked onchange="toggleDataset(1)"> Nippon
                         </label>
-                        <label class="custom-checkbox" style="color:var(--total-color); display:inline-flex;">
-                            <input type="checkbox" id="showTotal" checked onchange="toggleDataset(2)"> Total
+                        <label class="custom-checkbox" style="color:var(--silver-color); display:inline-flex; margin-right:10px;">
+                            <input type="checkbox" id="showSilver" checked onchange="toggleDataset(2)"> Silver Parity
+                        </label>
+                        <label class="custom-checkbox" style="color:var(--total-line-color); display:inline-flex;">
+                            <input type="checkbox" id="showTotal" checked onchange="toggleDataset(3)"> Total P&L
                         </label>
                      </div>
                      <div style="display:flex; gap:10px; align-items:center;">
@@ -743,7 +762,7 @@
     }
 
     // --- Configuration ---
-    const STORAGE_KEY = 'silver_portfolio_v29'; // Updated version key
+    const STORAGE_KEY = 'silver_portfolio_v30'; 
     const DATA_STORAGE_KEY = 'silver_history_data';
     const OZ_TO_KG = 32.1507;
     const KG_TO_GRAM = 1000;
@@ -753,7 +772,6 @@
     let currentChartType = 'portfolio';
 
     // --- Exact Data Provided by User (Default Historical Record) ---
-    // Changed to 'let' to allow overwriting via Upload
 	let staticData = [
 		{ d: "23-Jan-26", ag: 100.64, usd: 91.63, ic: 306.55, nip: 292.73 },
 		{ d: "22-Jan-26", ag: 93.53, usd: 91.63, ic: 278.9, nip: 276.3 },
@@ -801,6 +819,7 @@
     const totalInvEl = document.getElementById('totalInvested');
     const totalValEl = document.getElementById('totalValue');
     const totalPnlEl = document.getElementById('totalPnl');
+    const totalCard = document.getElementById('totalSummaryCard');
     
     const dataSourceLabel = document.getElementById('dataSourceLabel');
     const lastUpdateLabel = document.getElementById('lastUpdateLabel');
@@ -985,7 +1004,7 @@
         prepareData();
         loadState(); // Load saved user inputs
         initChart();
-        calculatePortfolioAndSave(); 
+        calculatePortfolio(); 
     }
 
     // --- SAVE / LOAD STATE (Enhanced) ---
@@ -998,7 +1017,6 @@
             silver: silverInput.value
         };
         localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-        // logDebug("Auto-saved state", "info");
     }
 
     function loadState() {
@@ -1013,8 +1031,16 @@
             const data = JSON.parse(stored);
             if(data.iciciInv) iciciInv.value = data.iciciInv;
             if(data.iciciAvg) iciciAvg.value = data.iciciAvg;
+            // Calibrate units on load
+            if(data.iciciInv && data.iciciAvg && parseFloat(data.iciciAvg) > 0) {
+                document.getElementById('iciciUnits').value = (data.iciciInv / data.iciciAvg).toFixed(3);
+            }
+
             if(data.nipponInv) nipponInv.value = data.nipponInv;
             if(data.nipponAvg) nipponAvg.value = data.nipponAvg;
+            if(data.nipponInv && data.nipponAvg && parseFloat(data.nipponAvg) > 0) {
+                document.getElementById('nipponUnits').value = (data.nipponInv / data.nipponAvg).toFixed(3);
+            }
             
             if(data.premium) { 
                 premiumRange.value = data.premium; 
@@ -1035,50 +1061,81 @@
         document.getElementById('silverPriceRange').value = loadedSilver;
     }
 
-    // Combined function to calculate AND save state (for inputs)
-    window.calculatePortfolioAndSave = function() {
-        calculatePortfolio();
-        saveState();
-    }
-
     window.syncInputs = function(src, dest) {
         document.getElementById(dest).value = document.getElementById(src).value;
-        calculatePortfolioAndSave();
+        saveState();
+        calculatePortfolio();
     }
     
     window.updatePremium = function() {
         globalPremiumPercent = parseFloat(premiumRange.value);
         premiumDisplay.innerText = globalPremiumPercent.toFixed(1) + "%";
-        calculatePortfolioAndSave();
+        saveState();
+        calculatePortfolio();
+    }
+
+    // --- Dynamic Sync Input Handlers ---
+    window.onInvestedInput = function(ticker) {
+        const inv = parseFloat(document.getElementById(ticker+'Invested').value) || 0;
+        const avg = parseFloat(document.getElementById(ticker+'Avg').value) || 0;
+        if(avg > 0) {
+            document.getElementById(ticker+'Units').value = (inv / avg).toFixed(3);
+        }
+        calculatePortfolio();
+        saveState();
+    }
+
+    window.onPriceInput = function(ticker) {
+        const inv = parseFloat(document.getElementById(ticker+'Invested').value) || 0;
+        const avg = parseFloat(document.getElementById(ticker+'Avg').value) || 0;
+        if(avg > 0 && inv > 0) {
+            document.getElementById(ticker+'Units').value = (inv / avg).toFixed(3);
+        }
+        calculatePortfolio();
+        saveState();
+    }
+
+    window.onUnitsInput = function(ticker) {
+        // Keeping Invested amount constant, updating avg price
+        const inv = parseFloat(document.getElementById(ticker+'Invested').value) || 0;
+        const units = parseFloat(document.getElementById(ticker+'Units').value) || 0;
+        if(units > 0 && inv > 0) {
+            document.getElementById(ticker+'Avg').value = (inv / units).toFixed(2);
+        }
+        calculatePortfolio();
+        saveState();
+    }
+
+    // --- Fix for missing function ---
+    window.updateChartDisplay = function() {
+        calculatePortfolio();
     }
 
     function calculatePortfolio() {
         const usd = parseFloat(usdInput.value) || 0;
         const silver = parseFloat(silverInput.value) || 0;
 
-        // Current Forecast Logic (for the top cards)
+        // Current Forecast Logic
         const basePrice = (silver * OZ_TO_KG * usd) / KG_TO_GRAM;
         const currentIciciPrice = basePrice * (1 + (globalPremiumPercent/100));
-        const currentNipponPrice = currentIciciPrice * 0.99; // Simple spread logic for *forecast* only
+        const currentNipponPrice = currentIciciPrice * 0.99; 
 
         iciciPriceEl.innerText = "₹" + currentIciciPrice.toFixed(2);
         nipponPriceEl.innerText = "₹" + currentNipponPrice.toFixed(2);
 
         const iInv = parseFloat(iciciInv.value) || 0;
-        const iAvg = parseFloat(iciciAvg.value) || 0;
-        let iUnits = 0, iVal = 0, iPnl = 0;
-        if(iInv > 0 && iAvg > 0) {
-            iUnits = iInv / iAvg;
+        const iUnits = parseFloat(document.getElementById('iciciUnits').value) || 0;
+        let iVal = 0, iPnl = 0;
+        if(iInv > 0 && iUnits > 0) {
             iVal = iUnits * currentIciciPrice;
             iPnl = iVal - iInv;
         }
         formatPnl(iciciPnlEl, iPnl, iInv);
 
         const nInv = parseFloat(nipponInv.value) || 0;
-        const nAvg = parseFloat(nipponAvg.value) || 0;
-        let nUnits = 0, nVal = 0, nPnl = 0;
-        if(nInv > 0 && nAvg > 0) {
-            nUnits = nInv / nAvg;
+        const nUnits = parseFloat(document.getElementById('nipponUnits').value) || 0;
+        let nVal = 0, nPnl = 0;
+        if(nInv > 0 && nUnits > 0) {
             nVal = nUnits * currentNipponPrice;
             nPnl = nVal - nInv;
         }
@@ -1092,6 +1149,13 @@
         totalValEl.innerText = "₹" + tVal.toLocaleString('en-IN', {maximumFractionDigits:0});
         formatPnl(totalPnlEl, tPnl, tInv);
 
+        // Update Total Card Background dynamically
+        if (tPnl < 0) {
+            totalCard.style.background = 'var(--total-bg-loss)';
+        } else {
+            totalCard.style.background = 'var(--total-bg)';
+        }
+
         updateChartData(currentIciciPrice, currentNipponPrice, iUnits, nUnits);
         if(document.getElementById('tableWrapper').style.display !== 'none') {
             renderTable(); 
@@ -1100,8 +1164,9 @@
 
     function formatPnl(el, amount, base) {
         const pct = base > 0 ? (amount/base)*100 : 0;
-        const sign = amount >= 0 ? "+" : "";
-        el.innerText = `${sign}₹${Math.abs(amount).toFixed(0)} (${sign}${pct.toFixed(2)}%)`;
+        const sign = amount >= 0 ? "+" : "-"; // Explicit negative sign
+        // Use Math.abs for amount AND pct to avoid double negatives e.g. --10%
+        el.innerText = `${sign}₹${Math.abs(amount).toFixed(0)} (${sign}${Math.abs(pct).toFixed(2)}%)`;
         el.className = amount >= 0 ? 'pnl-positive' : 'pnl-negative';
     }
 
@@ -1117,10 +1182,11 @@
                 scales: {
                     x: { grid: { display: false } },
                     y: { beginAtZero: false, title: { display: true, text: 'Price' } },
-                    y1: { type: 'linear', display: true, position: 'right', grid: { drawOnChartArea: false }, title: { display: true, text: 'Total Value (₹)' } }
+                    y1: { type: 'linear', display: true, position: 'right', grid: { drawOnChartArea: false }, title: { display: true, text: 'Total P&L (₹)' } }
                 }
             }
         });
+        updateChartTheme();
     }
 
     function updateChartTheme() {
@@ -1141,26 +1207,27 @@
         }
         
         const ds = chartInstance.data.datasets;
-        if (currentChartType === 'portfolio' && ds.length >= 3) {
-            ds[0].borderColor = isDark ? '#ff6b6b' : '#e74c3c';
-            ds[1].borderColor = isDark ? '#4fa3d1' : '#2980b9';
-            ds[2].borderColor = isDark ? '#34d399' : '#10b981';
-        } else if (currentChartType === 'premium' && ds.length > 0) {
-            ds[0].borderColor = isDark ? '#a569bd' : '#8e44ad';
-        } else if (currentChartType === 'silver' && ds.length > 0) {
-            ds[0].borderColor = isDark ? '#95a5a6' : '#7f8c8d';
-        } else if (currentChartType === 'usd' && ds.length > 0) {
-            ds[0].borderColor = isDark ? '#e67e22' : '#d35400';
+        // Update line colors based on theme if needed, though defined via CSS vars mainly
+        // Specific requirement: ICICI=RedOrange, Nippon=Blue, Total=Purple
+        if (currentChartType === 'portfolio' && ds.length >= 4) {
+            ds[0].borderColor = isDark ? '#ff8a80' : '#ff5252'; 
+            ds[1].borderColor = isDark ? '#64b5f6' : '#2196f3'; 
+            ds[2].borderColor = isDark ? '#95a5a6' : '#7f8c8d'; 
+            ds[3].borderColor = isDark ? '#ce93d8' : '#9c27b0';
         }
 
         chartInstance.update();
     }
 
+    // Robust Checkbox Logic
     window.toggleDataset = function(index) {
         if(chartInstance && chartInstance.data.datasets[index]) {
-            const isChecked = document.querySelectorAll('#graphControls input[type="checkbox"]')[index].checked;
-            chartInstance.data.datasets[index].hidden = !isChecked;
-            chartInstance.update();
+            const checkboxes = document.querySelectorAll('#graphControls input[type="checkbox"]');
+            // Check if checkbox exists at index
+            if(checkboxes[index]) {
+                chartInstance.data.datasets[index].hidden = !checkboxes[index].checked;
+                chartInstance.update();
+            }
         }
     }
 
@@ -1169,6 +1236,7 @@
         const sliceStart = Math.max(0, historyData.dates.length - daysToShow);
         const isDark = document.body.getAttribute('data-theme') === 'dark';
         
+        // 1. Create clean sliced arrays first
         const labels = historyData.dates.slice(sliceStart);
         const dIcici = historyData.icici.slice(sliceStart);
         const dNippon = historyData.nippon.slice(sliceStart);
@@ -1182,19 +1250,66 @@
             labels.push('Forecast');
             dIcici.push(currIcici);
             dNippon.push(currNippon);
+            dSilver.push(parseFloat(silverInput.value)); 
+            dUsd.push(parseFloat(usdInput.value));       
             
-            const dTotal = dIcici.map((pI, idx) => {
+            // Calculate Total P&L line
+            const iAvg = parseFloat(iciciAvg.value) || 0;
+            const nAvg = parseFloat(nipponAvg.value) || 0;
+
+            const dTotalPnl = dIcici.map((pI, idx) => {
                 const pN = dNippon[idx] || 0;
-                return (pI * iUnits) + (pN * nUnits);
+                let pnl = 0;
+                if(iUnits > 0) pnl += (pI - iAvg) * iUnits;
+                if(nUnits > 0) pnl += (pN - nAvg) * nUnits;
+                return pnl;
+            });
+
+            // Calculate Parity Line
+            const dParity = dSilver.map((ag, idx) => {
+                const us = dUsd[idx] || 90.28; 
+                return (ag * OZ_TO_KG * us) / KG_TO_GRAM;
             });
 
             datasets = [
-                { label: 'ICICI (₹)', data: dIcici, borderColor: isDark ? '#ff6b6b' : '#e74c3c', backgroundColor: 'rgba(231,76,60,0.1)', fill:true, tension:0.3 },
-                { label: 'Nippon (₹)', data: dNippon, borderColor: isDark ? '#4fa3d1' : '#2980b9', backgroundColor: 'rgba(41,128,185,0.1)', fill:true, tension:0.3 },
-                { label: 'Total Value (₹)', data: dTotal, borderColor: isDark ? '#34d399' : '#10b981', borderDash:[5,5], tension:0.3, yAxisID: 'y1' }
+                { 
+                    label: 'ICICI (₹)', 
+                    data: dIcici, 
+                    borderColor: isDark ? '#ff8a80' : '#ff5252', 
+                    backgroundColor: 'rgba(255,82,82,0.1)', 
+                    fill: false, 
+                    tension: 0.3 
+                },
+                { 
+                    label: 'Nippon (₹)', 
+                    data: dNippon, 
+                    borderColor: isDark ? '#64b5f6' : '#2196f3', 
+                    backgroundColor: 'rgba(33,150,243,0.1)', 
+                    fill: false, 
+                    tension: 0.3 
+                },
+                { 
+                    label: 'Silver Parity (₹)', 
+                    data: dParity, 
+                    borderColor: isDark ? '#95a5a6' : '#7f8c8d', 
+                    borderDash: [5, 5], 
+                    pointRadius: 0,
+                    tension: 0.3 
+                },
+                { 
+                    label: 'Total P&L (₹)', 
+                    data: dTotalPnl, 
+                    borderColor: isDark ? '#ce93d8' : '#9c27b0', // Distinct Purple
+                    borderWidth: 2, 
+                    tension: 0.3, 
+                    yAxisID: 'y1' 
+                }
             ];
             yLabel = 'Unit Price (₹)';
-            if(chartInstance.options.scales.y1) chartInstance.options.scales.y1.display = true;
+            if(chartInstance.options.scales.y1) {
+                chartInstance.options.scales.y1.display = true;
+                chartInstance.options.scales.y1.title.text = 'Total P&L (₹)';
+            }
         } else if (currentChartType === 'premium') {
             const dPremiumIcici = dIcici.map((ic, idx) => {
                 const ag = dSilver[idx] || 0;
@@ -1202,7 +1317,7 @@
                 const base = (ag * OZ_TO_KG * us) / KG_TO_GRAM;
                 return base > 0 ? ((ic - base) / base) * 100 : 0;
             });
-            dPremiumIcici.push(globalPremiumPercent); // Push forecast
+            dPremiumIcici.push(globalPremiumPercent);
             
             const dPremiumNippon = dNippon.map((nip, idx) => {
                 const ag = dSilver[idx] || 0;
@@ -1210,13 +1325,13 @@
                 const base = (ag * OZ_TO_KG * us) / KG_TO_GRAM;
                 return base > 0 ? ((nip - base) / base) * 100 : 0;
             });
-            dPremiumNippon.push(globalPremiumPercent); // Push forecast
+            dPremiumNippon.push(globalPremiumPercent);
 
             labels.push('Forecast');
 
             datasets = [
-                { label: 'ICICI Premium %', data: dPremiumIcici, borderColor: isDark ? '#ff6b6b' : '#e74c3c', fill: false, tension: 0.3 },
-                { label: 'Nippon Premium %', data: dPremiumNippon, borderColor: isDark ? '#4fa3d1' : '#2980b9', fill: false, tension: 0.3 }
+                { label: 'ICICI Premium %', data: dPremiumIcici, borderColor: isDark ? '#ff8a80' : '#ff5252', fill: false, tension: 0.3 },
+                { label: 'Nippon Premium %', data: dPremiumNippon, borderColor: isDark ? '#64b5f6' : '#2196f3', fill: false, tension: 0.3 }
             ];
             yLabel = 'Premium (%)';
             if(chartInstance.options.scales.y1) chartInstance.options.scales.y1.display = false;
@@ -1250,11 +1365,14 @@
         chartInstance.data.datasets = datasets;
         if(chartInstance.options.scales.y) chartInstance.options.scales.y.title.text = yLabel;
         
+        // Re-apply checkbox state logic to ensure visibility persists across updates
         const controls = document.getElementById('graphControls');
         if(currentChartType === 'portfolio') {
             controls.style.visibility = 'visible';
             const checks = document.querySelectorAll('#graphControls input[type="checkbox"]');
-            chartInstance.data.datasets.forEach((ds, i) => { if(checks[i]) ds.hidden = !checks[i].checked; });
+            chartInstance.data.datasets.forEach((ds, i) => { 
+                if(checks[i]) ds.hidden = !checks[i].checked; 
+            });
         } else {
             controls.style.visibility = 'hidden';
         }
@@ -1322,12 +1440,9 @@
         logDebug("Starting Fetch...", "info");
         
         const ts = Date.now();
-        // Use query2 to potentially avoid blocks
         const base = "https://query2.finance.yahoo.com/v8/finance/chart/";
-        // Changed range to 1mo to get full history for the table
         const params = "?interval=1d&range=5d&_=" + ts; 
 
-        // 1. Live USD (Frankfurter)
         let liveUsd = null;
         try {
             const usdRes = await fetch('https://api.frankfurter.app/latest?from=USD&to=INR');
@@ -1336,7 +1451,7 @@
                 liveUsd = usdData.rates.INR;
                 usdInput.value = liveUsd.toFixed(2);
                 document.getElementById('usdInrRange').value = liveUsd;
-                saveState(); // SAVE NEW USD
+                saveState();
                 logDebug(`USD Fetch Success: ₹${liveUsd}`, "success");
             }
         } catch(e) { 
@@ -1344,8 +1459,6 @@
             logDebug("USD Fetch Failed", "error");
         }
 
-        // 2. Live Silver (Yahoo via proxy)
-        // Fallback Logic: Try Silver Spot first, then Futures if needed
         let silverData = null;
         try {
             silverData = await fetchWithFallback(`${base}XAGUSD=X${params}`);
@@ -1362,32 +1475,26 @@
             const liveSilver = silverData.chart.result[0].meta.regularMarketPrice;
             silverInput.value = liveSilver.toFixed(2);
             document.getElementById('silverPriceRange').value = liveSilver;
-            saveState(); // SAVE NEW SILVER
+            saveState();
             
             logDebug(`Silver Fetch Success: $${liveSilver}`, "success");
             
             const todayStr = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: '2-digit' }).replace(/ /g, '-');
-            
-            // Only update or append the "Live" data point at the end of the history array
-            // Do NOT touch the previous static historical data.
             const lastDate = historyData.dates[historyData.dates.length-1];
-            
             const currentUsdVal = liveUsd || parseFloat(usdInput.value);
             const base = (liveSilver * OZ_TO_KG * currentUsdVal) / KG_TO_GRAM;
             const currentPrem = parseFloat(premiumRange.value);
             
             const estIcici = base * (1 + (currentPrem/100));
-            const estNippon = estIcici * 0.99; // Simple ratio for forecast
+            const estNippon = estIcici * 0.99;
 
             if(lastDate.indexOf("Live") === -1 && lastDate !== todayStr) {
-                // New Day: Append
                 historyData.dates.push(todayStr + " (Live)");
                 historyData.silver.push(liveSilver);
                 historyData.usd.push(currentUsdVal);
                 historyData.icici.push(estIcici);
                 historyData.nippon.push(estNippon);
             } else {
-                // Update Today's point
                 const idx = historyData.dates.length - 1;
                 historyData.dates[idx] = todayStr + " (Live)"; 
                 historyData.silver[idx] = liveSilver;
@@ -1402,7 +1509,8 @@
              logDebug("Fetch failed: No valid Silver data found", "error");
         }
 
-        calculatePortfolioAndSave();
+        calculatePortfolio(); // Calling base calculate, which now saves too if needed via wrapper or manual
+        saveState();
     }
 
     init();
